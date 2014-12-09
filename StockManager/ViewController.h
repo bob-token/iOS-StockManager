@@ -8,8 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController<UITableViewDataSource>
+@property (strong, nonatomic) IBOutlet UITableView *tableview;
 
+- (IBAction)btAdd:(id)sender;
+- (IBAction)btStart:(id)sender;
+- (IBAction)btStop:(id)sender;
+
+
+@property (nonatomic, retain)NSMutableArray* datasource;
 
 @end
 

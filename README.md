@@ -1,4 +1,0 @@
-iOS-StockManager
-================
-
-Stockmanager
