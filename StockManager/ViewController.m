@@ -26,6 +26,22 @@
 
 @end
 
+@implementation StockInfo
+-(float)getPercent
+{
+    return (self.nowPrice - self.closePrice)*100/self.closePrice;
+}
+
+-(BOOL)isValide
+{
+    if (self.nowPrice > 0) {
+        return YES;
+    }
+    return NO;
+}
+
+@end
+
 @implementation ViewController
 
 - (void)dealloc
@@ -43,21 +59,103 @@
     }
     if (_codeArray == nil) {
         _codeArray = [[NSMutableArray alloc] initWithCapacity:3];
-        [_codeArray addObject:@"sh600000"];
+        [_codeArray addObject:@"600001"];
     }
     
     UILongPressGestureRecognizer * longPressGr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressToDo:)];
     longPressGr.minimumPressDuration = 1.0;
     [self.tableview addGestureRecognizer:longPressGr];
 }
--(void)success:(AFHTTPRequestOperation *)operation result:(id) responseObject {
+-(StockInfo*)parseResult:(NSString*)code result:(NSString*)result
+{
+    if (code != nil && result != nil && result.length > 50) {
+        StockInfo* info = [[StockInfo alloc] init];
+        int len = result.length;
+        NSRange rg;
+        rg.length = len-2 - 21;
+        rg.location = 21;
+        NSString * r = [result substringWithRange:rg];
+        info.code = code;
+        NSArray* inf = [r componentsSeparatedByString:@","];
+        int index = 0;
+//        info.Code = inf[index++];
+        info.Name = inf[index++];
+        info.OpenPrice = [inf[index++] floatValue];
+        info.ClosePrice = [inf[index++] floatValue];
+        info.NowPrice = [inf[index++] floatValue];
+        info.MaxPrice = [inf[index++] floatValue];
+        info.MinPrice = [inf[index++] floatValue];
+        info.OneBuyPrice = [inf[index++] floatValue];
+        info.OneSellPrice = [inf[index++] floatValue];
+        info.Volume = [inf[index++] integerValue];
+        info.date = inf[31];
+        info.time = inf[32];
+        return info;
+    }
+    return nil;
+}
+
+-(NSInteger)getCodeIndex:(NSString*)code
+{
+    __block NSInteger index = -1;
+    if (code != nil && _datasource!= nil && _datasource.count > 0) {
+        [_datasource enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            if([code isEqualToString:((StockInfo*)obj).code]){
+                *stop = YES;
+                index = idx;
+            }
+        }];
+    }
+    return  index;
+}
+
+-(void)parseCodeInfo:(NSString*)code info:(NSString*)info
+{
+    StockInfo* f = [self parseResult:code result:info];
+    if (f != nil) {
+        
+        NSInteger index =  [self getCodeIndex:code];
+        
+        if (index == -1) {
+            [_datasource addObject:f];
+        }else{
+            [_datasource replaceObjectAtIndex:index withObject:f];
+        }
+        
+        [_tableview reloadData];
+    }
+}
+
+-(NSString*)buildCode:(NSString*)codeid{
     
-    NSLog(@"JSON: %@", responseObject);
-    
-};
+    if(codeid != nil){
+        codeid=[ codeid stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
+        if(codeid.length > 5){
+            char first = [codeid characterAtIndex:0];
+            
+            NSString* prefix=nil;
+            
+            switch(first){
+                case '6':
+                    prefix=@"sh";
+                    break;
+                case '3':
+                case '0':
+                    prefix=@"sz";
+                    break;
+                default:
+                    BOBLOG(@"BuildCodeError:invalid code !");
+            }
+            return [prefix stringByAppendingString:codeid];
+        }
+    }
+    return nil;
+}
 
 -(void)updateCodeInfo:(NSString*) code{
     if ([self codeIsValid:code]) {
+        code = [self buildCode:code];
         AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
         manager.responseSerializer.acceptableContentTypes = [manager.responseSerializer.acceptableContentTypes setByAddingObject:@"application/x-javascript"];
         NSString* baseurl = @"http://hq.sinajs.cn/?_=1314426110204&list=";
@@ -68,6 +166,7 @@
         [manager GET:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSLog(@"JSON: %@", [ [NSString alloc] initWithData:responseObject encoding:enc] );
+            [self parseCodeInfo:code info:[ [NSString alloc] initWithData:responseObject encoding:enc]];
             
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             
@@ -140,6 +239,13 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(NSString*)constructCodeDisplayInfo:(StockInfo*)info
+{
+    if (info && [info isValide]) {
+        return [NSString stringWithFormat:@"%@:%f",info.code,info.nowPrice];
+    }
+    return nil;
+}
 #pragma tableview 
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -150,7 +256,7 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:TAB_CELL_ID];
     }
-    [cell.textLabel setText:_datasource[indexPath.row]];
+    [cell.textLabel setText:[self constructCodeDisplayInfo:_datasource[indexPath.row]]];
     return cell;
 }
 
@@ -196,7 +302,7 @@
 - (BOOL)codeIsValid:(NSString*)code
 {
     if (code == nil) return NO;
-    if (code.length != 8) return NO;
+    if (code.length != 6) return NO;
     
     
     return YES;
