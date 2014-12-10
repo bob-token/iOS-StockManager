@@ -17,6 +17,14 @@
 
 
 @property (nonatomic, retain)NSMutableArray* datasource;
+@property (nonatomic, retain)NSMutableArray* codeArray;
+@property (nonatomic,retain)NSTimer* updateTimer;
 
 @end
 
+@interface MYAlertView : UIAlertView
+@property (strong, nonatomic) id userData;
+@property (nonatomic, assign)NSInteger typeId;
+
+
+@end
