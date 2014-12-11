@@ -23,16 +23,13 @@ PODS:
   - AFNetworking/UIKit (2.5.0):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
-  - JSONKit (1.5pre)
 
 DEPENDENCIES:
   - AFNetworkActivityLogger (~> 2.0.3)
   - AFNetworking (~> 2.4)
-  - JSONKit (~> 1.5pre)
 
 SPEC CHECKSUMS:
   AFNetworkActivityLogger: d6a2d2755fada3a1fbf1f490ec0dd92224e092a4
   AFNetworking: 0f54cb5d16ce38c1b76948faffb8d5fb705021c7
-  JSONKit: efef3bbd3372ff33f96b9c6f34cf4fe18e74ab69
 
 COCOAPODS: 0.35.0

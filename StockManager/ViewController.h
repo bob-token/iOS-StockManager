@@ -52,7 +52,8 @@
 @property (nonatomic, assign)int sellFiveVolue;
 @property (nonatomic, strong)NSString* date;
 @property (nonatomic, strong)NSString* time;
-
+-(id)initWithCode:(NSString*)code;
 -(float)getPercent;
 -(BOOL)isValide;
+-(NSString*)constructCodeDisplayInfo;
 @end

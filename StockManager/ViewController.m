@@ -6,6 +6,7 @@
 //  Copyright (c) 2014年 bob. All rights reserved.
 //
 
+#import <AudioToolbox/AudioToolbox.h>
 #import "ViewController.h"
 #import "AFNetworking.h"
 
@@ -13,6 +14,9 @@
 #define ALERT_ID_ADD    2
 
 #define BOBLOG NSLog
+
+#define CODES_SAVE_KEY @"codes"
+
 
 @interface ViewController ()
 
@@ -27,6 +31,16 @@
 @end
 
 @implementation StockInfo
+
+-(id)initWithCode:(NSString*)code
+{
+    if(self = [super init]){
+        self.code = code;
+        return self;
+    }
+    return nil;
+}
+
 -(float)getPercent
 {
     return (self.nowPrice - self.closePrice)*100/self.closePrice;
@@ -39,16 +53,83 @@
     }
     return NO;
 }
+-(NSString*)constructCodeDisplayInfo
+{
 
+    if ([self isValide]) {
+        return [NSString stringWithFormat:@"%@:(%.2f)%.2f %d",self.code,[self getPercent],self.nowPrice,self.volume];
+    }
+    return self.code;
+}
 @end
 
 @implementation ViewController
 
 - (void)dealloc
 {
+    [self saveCodes];
     self.datasource = nil;
     self.codeArray = nil;
     [self btStop:self];
+}
+
+/**
+ *  @author bob, 14-12-08 15:12:48
+ *
+ *  向standardUserDefaults中设置值
+ *  注意:不能保存值或key为nil的键值对
+ *
+ *  @param value 被设置的值
+ *  @param key   相关联的key
+ *
+ */
+
++(void) standardUserDefaultsSetValue:(id)value forKey:(NSString *)key
+{
+    if (value != nil && key != nil) {
+        
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        
+        [ud setObject:value forKey:key];
+        
+        [ud synchronize];
+    }
+}
+/**
+ *  @author bob, 14-12-08 15:12:00
+ *
+ *  从standardUserDefaults中获取值
+ *
+ *  @param key 相关联的Key
+ *
+ *  @return 返回key 的值 或 nil
+ */
++(id) standardUserDefaultsGetValueforKey:(NSString *)key
+{
+    if ( key != nil ) {
+        
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        
+        return [ud valueForKey:key];
+    }
+    
+    return nil;
+}
+
+-(void)loadCodes
+{
+   self.codeArray = [ViewController standardUserDefaultsGetValueforKey:CODES_SAVE_KEY];
+    if (_codeArray != nil && _codeArray.count > 0) {
+        for (NSString *code in _codeArray) {
+            [_datasource addObject:[[StockInfo alloc] initWithCode:code]];
+        }
+        [_tableview reloadData];
+    }
+}
+
+-(void)saveCodes
+{
+    [ViewController standardUserDefaultsSetValue:self.codeArray forKey:CODES_SAVE_KEY];
 }
 
 - (void)viewDidLoad {
@@ -57,9 +138,11 @@
     if (_datasource ==nil) {
         self.datasource = [[NSMutableArray alloc] initWithCapacity:3];
     }
+    
+    [self loadCodes];
     if (_codeArray == nil) {
         _codeArray = [[NSMutableArray alloc] initWithCapacity:3];
-        [_codeArray addObject:@"600001"];
+//        [_codeArray addObject:@"600000"];
     }
     
     UILongPressGestureRecognizer * longPressGr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressToDo:)];
@@ -95,7 +178,7 @@
     return nil;
 }
 
--(NSInteger)getCodeIndex:(NSString*)code
+-(NSInteger)getCodeIndexInTabViewSource:(NSString*)code
 {
     __block NSInteger index = -1;
     if (code != nil && _datasource!= nil && _datasource.count > 0) {
@@ -109,12 +192,26 @@
     return  index;
 }
 
+-(NSInteger)getCodeIndexInCodeArray:(NSString*)code
+{
+    __block NSInteger index = -1;
+    if (code != nil &&_codeArray!= nil &&_codeArray.count > 0) {
+        [_codeArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            if([code isEqualToString:obj]){
+                *stop = YES;
+                index = idx;
+            }
+        }];
+    }
+    return  index;
+}
+
 -(void)parseCodeInfo:(NSString*)code info:(NSString*)info
 {
     StockInfo* f = [self parseResult:code result:info];
     if (f != nil) {
         
-        NSInteger index =  [self getCodeIndex:code];
+        NSInteger index =  [self getCodeIndexInTabViewSource:code];
         
         if (index == -1) {
             [_datasource addObject:f];
@@ -153,9 +250,9 @@
     return nil;
 }
 
--(void)updateCodeInfo:(NSString*) code{
-    if ([self codeIsValid:code]) {
-        code = [self buildCode:code];
+-(void)updateCodeInfo:(NSString*) strCode{
+    if ([self codeIsValid:strCode]) {
+        NSString* code = [self buildCode:strCode];
         AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
         manager.responseSerializer.acceptableContentTypes = [manager.responseSerializer.acceptableContentTypes setByAddingObject:@"application/x-javascript"];
         NSString* baseurl = @"http://hq.sinajs.cn/?_=1314426110204&list=";
@@ -166,7 +263,7 @@
         [manager GET:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSLog(@"JSON: %@", [ [NSString alloc] initWithData:responseObject encoding:enc] );
-            [self parseCodeInfo:code info:[ [NSString alloc] initWithData:responseObject encoding:enc]];
+            [self parseCodeInfo:strCode info:[ [NSString alloc] initWithData:responseObject encoding:enc]];
             
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             
@@ -225,8 +322,18 @@
         case ALERT_ID_DELETE:
         {
             if (buttonIndex == 1) {
-                [_datasource removeObjectAtIndex:[alert.userData integerValue]];
-                [_tableview reloadData];
+                
+                int index = [alert.userData integerValue];
+                
+                if (index < _datasource.count) {
+                    StockInfo* info = _datasource[index];
+                    int codeIndex = [self getCodeIndexInCodeArray:info.code];
+                    if (codeIndex != -1) {
+                        [_codeArray removeObjectAtIndex:codeIndex];
+                    }
+                    [_datasource removeObjectAtIndex:index];
+                    [_tableview reloadData];
+                }
             }
         }break;
         default:
@@ -239,14 +346,7 @@
     // Dispose of any resources that can be recreated.
 }
 
--(NSString*)constructCodeDisplayInfo:(StockInfo*)info
-{
-    if (info && [info isValide]) {
-        return [NSString stringWithFormat:@"%@:%f",info.code,info.nowPrice];
-    }
-    return nil;
-}
-#pragma tableview 
+#pragma tableview
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -256,7 +356,7 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:TAB_CELL_ID];
     }
-    [cell.textLabel setText:[self constructCodeDisplayInfo:_datasource[indexPath.row]]];
+    [cell.textLabel setText:((StockInfo*)_datasource[indexPath.row]).constructCodeDisplayInfo];
     return cell;
 }
 
@@ -306,6 +406,10 @@
     
     
     return YES;
+}
+-(void)viber
+{
+    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 }
 
 @end
