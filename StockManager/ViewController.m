@@ -9,6 +9,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import "ViewController.h"
 #import "AFNetworking.h"
+#import "TableViewCell.h"
 
 #define ALERT_ID_DELETE 1
 #define ALERT_ID_ADD    2
@@ -17,6 +18,7 @@
 
 #define CODES_SAVE_KEY @"codes"
 
+#define TABLEVIEW_CELL_REUSE_ID @"TableViewCell"
 
 @interface ViewController ()
 
@@ -53,21 +55,67 @@
     }
     return NO;
 }
+
+@end
+
+@implementation StockInfoHelper
+-(id)initWithCode:(NSString *)code
+{
+    if (self = [self init]) {
+        StockInfo * f = [[StockInfo alloc] initWithCode:code];
+        if (f) {
+            self.stock = f;
+            return self;
+        }
+    }
+    return nil;
+}
+-(id)initWithStockInfo:(StockInfo*)stock
+{
+    if (self = [self init]) {
+        self.stock = stock;
+        return self;
+    }
+    return nil;
+}
 -(NSString*)constructCodeDisplayInfo
 {
 
-    if ([self isValide]) {
-        return [NSString stringWithFormat:@"%@:(%.2f)%.2f %d",self.code,[self getPercent],self.nowPrice,self.volume];
+    if (_stock && [_stock isValide]) {
+        NSString* tcode = _stock.code;
+        float tpercent = [_stock getPercent];
+        float tnowPrice = _stock.nowPrice;
+        NSInteger tKVolume = _stock.volume/1000;
+        float volumeAvr = _volumeAverage;
+        float valueAvr = _valueAverage;
+        return [NSString stringWithFormat:@"%@:(%.2f)%.2f %ld(K) %.2f(vma) %.2f(vua)",tcode,tpercent,tnowPrice,(long)tKVolume,volumeAvr,valueAvr];
     }
-    return self.code;
+    if (_stock) {
+        return _stock.code;
+    }
+    
+    return nil;
 }
-@end
+-(void)calcVolumeAverageRate
+{
+    if (_stock && [_stock isValide]) {
+        _volumeAverage = (_stock.volume - _lastVolume)/_lastVolume;
+        self.lastVolume = _stock.volume;
+    }
+}
+-(void)calcValueAverageRate
+{
+    if (_stock && [_stock isValide]) {
+        _valueAverage = (_stock.value - _lastValue)/_lastValue;
+        self.lastValue = _stock.value;
+    }
+}
 
+@end
 @implementation ViewController
 
 - (void)dealloc
 {
-    [self saveCodes];
     self.datasource = nil;
     self.codeArray = nil;
     [self btStop:self];
@@ -118,10 +166,17 @@
 
 -(void)loadCodes
 {
-   self.codeArray = [ViewController standardUserDefaultsGetValueforKey:CODES_SAVE_KEY];
+    NSArray* array = [ViewController standardUserDefaultsGetValueforKey:CODES_SAVE_KEY];
+    if (array == nil || array.count ==0) {
+        return;
+    }
+    
+    self.codeArray = [NSMutableArray arrayWithArray:array];
     if (_codeArray != nil && _codeArray.count > 0) {
+        [_datasource removeAllObjects];
         for (NSString *code in _codeArray) {
-            [_datasource addObject:[[StockInfo alloc] initWithCode:code]];
+            StockInfoHelper* fh =[[StockInfoHelper alloc] initWithCode:code];
+            [_datasource addObject:fh];
         }
         [_tableview reloadData];
     }
@@ -134,6 +189,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [_tableview registerClass:TableViewCell.class forCellReuseIdentifier:TABLEVIEW_CELL_REUSE_ID];
     // Do any additional setup after loading the view, typically from a nib.
     if (_datasource ==nil) {
         self.datasource = [[NSMutableArray alloc] initWithCapacity:3];
@@ -153,7 +209,7 @@
 {
     if (code != nil && result != nil && result.length > 50) {
         StockInfo* info = [[StockInfo alloc] init];
-        int len = result.length;
+        NSInteger len = result.length;
         NSRange rg;
         rg.length = len-2 - 21;
         rg.location = 21;
@@ -178,12 +234,21 @@
     return nil;
 }
 
+-(id)getObjInTableViewSourceBy:(NSString*)code
+{
+    NSInteger index = [self getCodeIndexInCodeArray:code];
+    if (index != -1) {
+        return _datasource[index];
+    }
+    return nil;
+}
 -(NSInteger)getCodeIndexInTabViewSource:(NSString*)code
 {
     __block NSInteger index = -1;
     if (code != nil && _datasource!= nil && _datasource.count > 0) {
         [_datasource enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            if([code isEqualToString:((StockInfo*)obj).code]){
+            StockInfoHelper* e = obj;
+            if([code isEqualToString:e.stock.code]){
                 *stop = YES;
                 index = idx;
             }
@@ -211,13 +276,16 @@
     StockInfo* f = [self parseResult:code result:info];
     if (f != nil) {
         
-        NSInteger index =  [self getCodeIndexInTabViewSource:code];
+        StockInfoHelper* fh =  [self getObjInTableViewSourceBy:code];
         
-        if (index == -1) {
-            [_datasource addObject:f];
-        }else{
-            [_datasource replaceObjectAtIndex:index withObject:f];
+        if (fh == nil) {
+            fh = [[StockInfoHelper alloc] initWithStockInfo:f];
+            [_datasource addObject:fh];
         }
+        fh.stock = f;
+        
+        [fh calcValueAverageRate];
+        [fh calcVolumeAverageRate];
         
         [_tableview reloadData];
     }
@@ -276,7 +344,6 @@
 
 -(void)updateInfo
 {
- 
     for (NSString* code in self.codeArray) {
         [self updateCodeInfo:code];
     }
@@ -300,7 +367,18 @@
         [alert show];
     }
 }
-
+-(BOOL)codeIsAdded:(NSString*)code
+{
+    if (code != nil) {
+        return [self getCodeIndexInCodeArray:code] != -1;
+    }
+    return NO;
+}
+-(void)alert:(NSString*)title message:(NSString*)msg
+{
+    MYAlertView* alert = [[MYAlertView alloc] initWithTitle:@"警告" message:msg delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil,nil];
+    [alert show];
+}
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
     MYAlertView* alert = (MYAlertView*)alertView;
     
@@ -309,13 +387,17 @@
         {
             if (buttonIndex == 1) {
                 NSString* code = [alert textFieldAtIndex:0].text;
-                if ([self codeIsValid:code]) {
-                    
-                    [_codeArray addObject:code];
+                if ([self codeIsValid:code] ) {
+                    if (![self codeIsAdded:code]) {
+                        [_codeArray addObject:code];
+                        [self saveCodes];
+                        StockInfoHelper* fh = [[StockInfoHelper alloc] initWithCode:code];
+                        [_datasource addObject:fh];
+                        [_tableview reloadData];
+                    }
+//                    [self alert:nil message:@"添加成功"];
                 }else{
-                    NSString* msg = @"输入不正确";
-                    MYAlertView* alert = [[MYAlertView alloc] initWithTitle:@"警告" message:msg delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil,nil];
-                    [alert show];
+                    [self alert:@"警告" message:@"输入不正确"];
                 }
             }
         }break;
@@ -323,16 +405,17 @@
         {
             if (buttonIndex == 1) {
                 
-                int index = [alert.userData integerValue];
+                NSInteger index = [alert.userData integerValue];
                 
                 if (index < _datasource.count) {
-                    StockInfo* info = _datasource[index];
-                    int codeIndex = [self getCodeIndexInCodeArray:info.code];
+                    StockInfoHelper* fh = _datasource[index];
+                    NSInteger codeIndex = [self getCodeIndexInCodeArray:fh.stock.code];
                     if (codeIndex != -1) {
                         [_codeArray removeObjectAtIndex:codeIndex];
                     }
                     [_datasource removeObjectAtIndex:index];
                     [_tableview reloadData];
+                    [self saveCodes];
                 }
             }
         }break;
@@ -350,13 +433,12 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-#define TAB_CELL_ID @"TAB_CELL_ID"
     
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:TAB_CELL_ID];
-    if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:TAB_CELL_ID];
-    }
-    [cell.textLabel setText:((StockInfo*)_datasource[indexPath.row]).constructCodeDisplayInfo];
+    StockInfoHelper* fh = (StockInfoHelper*)_datasource[indexPath.row];
+    TableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:TABLEVIEW_CELL_REUSE_ID];
+    [cell.textLabel setText:fh.constructCodeDisplayInfo];
+    cell.lb_code.text = fh.stock.code;
+    cell.lb_info.text = fh.constructCodeDisplayInfo;
     return cell;
 }
 
@@ -381,7 +463,6 @@
 
     alert.alertViewStyle =  UIAlertViewStylePlainTextInput;
     alert.typeId = ALERT_ID_ADD;
-    
     [alert show];
     
 }

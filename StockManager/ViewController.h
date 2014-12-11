@@ -29,6 +29,7 @@
 @end
 
 @interface StockInfo : NSObject
+
 @property (nonatomic,strong)NSString* code;
 @property (nonatomic,strong)NSString* name;
 @property (nonatomic, assign)float openPrice;
@@ -38,22 +39,35 @@
 @property (nonatomic, assign)float minPrice;
 @property (nonatomic, assign)float oneBuyPrice;
 @property (nonatomic, assign)float oneSellPrice;
-@property (nonatomic, assign)int volume;
-@property (nonatomic, assign)int value;
-@property (nonatomic, assign)int buyOneVolume;
-@property (nonatomic, assign)int buyTwoVolume;
-@property (nonatomic, assign)int buyThirdVolume;
-@property (nonatomic, assign)int buyFourVolume;
-@property (nonatomic, assign)int buyFiveVolue;
-@property (nonatomic, assign)int sellOneVolume;
-@property (nonatomic, assign)int sellTwoVolume;
-@property (nonatomic, assign)int sellThirdVolume;
-@property (nonatomic, assign)int sellFourVolume;
-@property (nonatomic, assign)int sellFiveVolue;
+@property (nonatomic, assign)NSInteger volume;
+@property (nonatomic, assign)NSInteger value;
+@property (nonatomic, assign)NSInteger buyOneVolume;
+@property (nonatomic, assign)NSInteger buyTwoVolume;
+@property (nonatomic, assign)NSInteger buyThirdVolume;
+@property (nonatomic, assign)NSInteger buyFourVolume;
+@property (nonatomic, assign)NSInteger buyFiveVolue;
+@property (nonatomic, assign)NSInteger sellOneVolume;
+@property (nonatomic, assign)NSInteger sellTwoVolume;
+@property (nonatomic, assign)NSInteger sellThirdVolume;
+@property (nonatomic, assign)NSInteger sellFourVolume;
+@property (nonatomic, assign)NSInteger sellFiveVolue;
 @property (nonatomic, strong)NSString* date;
 @property (nonatomic, strong)NSString* time;
 -(id)initWithCode:(NSString*)code;
 -(float)getPercent;
 -(BOOL)isValide;
+@end
+
+@interface StockInfoHelper : NSObject
+@property (nonatomic, strong)StockInfo* stock;
+@property (nonatomic,assign)NSInteger lastVolume;
+@property (nonatomic,assign)float volumeAverage;
+@property (nonatomic,assign)NSInteger lastValue;
+@property (nonatomic,assign)float valueAverage;
+
+-(id)initWithCode:(NSString*)code;
+-(id)initWithStockInfo:(StockInfo*)stock;
+-(void)calcVolumeAverageRate;
+-(void)calcValueAverageRate;
 -(NSString*)constructCodeDisplayInfo;
 @end
