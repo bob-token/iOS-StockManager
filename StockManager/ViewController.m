@@ -10,6 +10,10 @@
 #import "ViewController.h"
 #import "AFNetworking.h"
 #import "TableViewCell.h"
+#import "ConfigViewController.h"
+#import "StaticUtils.h"
+
+
 
 #define ALERT_ID_DELETE 1
 #define ALERT_ID_ADD    2
@@ -78,20 +82,101 @@
     }
     return nil;
 }
++(NSString*)buildCode:(NSString*)codeid{
+    
+    if(codeid != nil){
+        codeid=[ codeid stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
+        if(codeid.length > 5){
+            char first = [codeid characterAtIndex:0];
+            
+            NSString* prefix=nil;
+            
+            switch(first){
+                case '6':
+                    prefix=@"sh";
+                    break;
+                case '3':
+                case '0':
+                    prefix=@"sz";
+                    break;
+                default:
+                    BOBLOG(@"BuildCodeError:invalid code !");
+            }
+            return [prefix stringByAppendingString:codeid];
+        }
+    }
+    return nil;
+}
++ (BOOL)codeIsValid:(NSString*)code
+{
+    if (code == nil) return NO;
+    if (code.length != 6) return NO;
+    
+    return YES;
+}
++(BOOL)isSHStock:(NSString*)code
+{
+    if ([StockInfoHelper codeIsValid:code]) {
+        NSString* buildcode = [StockInfoHelper buildCode:code];
+        
+        if([buildcode characterAtIndex:1] == 'h')
+            return YES;
+    }
+    return NO;
+}
+
+-(BOOL) isBought
+{
+    if ([_stock isValide]  ) {
+        NSDictionary* dic = [ConfigViewController getCodeConfigInfo:_stock.code];
+        float buyPrice = [[dic valueForKey:PRICE_TAG] floatValue];
+        int total = [[dic valueForKey:VOLUME_TAG] integerValue];
+        if (buyPrice > 0 && total > 0) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+-(float) CalcCurIncome
+{
+    if ([_stock isValide]) {
+        float curPrice = _stock.nowPrice;
+        NSDictionary* dic = [ConfigViewController getCodeConfigInfo:_stock.code];
+        float buyPrice = [[dic valueForKey:PRICE_TAG] floatValue];
+        int total = [[dic valueForKey:VOLUME_TAG] integerValue];
+        return [StockInfoHelper CalcIncome:_stock.code buyprice:buyPrice sellprice:curPrice total:total];
+    }
+
+    return 0;
+}
++(float) CalcIncome:(NSString*) code buyprice:(float) buyprice sellprice:(float)sellprice total:(int) total
+{
+    float yinhuatax=(float) 0.001;
+    float servicechange=(float) 0.002;
+    if(code !=nil){
+        float income=(sellprice-buyprice)*total-(yinhuatax+servicechange)*sellprice;
+        if([StockInfoHelper isSHStock:code]){
+            income=income-1;
+        }
+        return income;
+    }
+    return 0;
+}
 -(NSString*)constructCodeDisplayInfo
 {
 
     if (_stock && [_stock isValide]) {
-        NSString* tcode = _stock.code;
         float tpercent = [_stock getPercent];
         float tnowPrice = _stock.nowPrice;
         NSInteger tKVolume = _stock.volume/1000;
         float volumeAvr = _volumeAverage;
         float valueAvr = _valueAverage;
-        return [NSString stringWithFormat:@"%@:(%.2f)%.2f %ld(K) %.2f(vma) %.2f(vua)",tcode,tpercent,tnowPrice,(long)tKVolume,volumeAvr,valueAvr];
+        return [NSString stringWithFormat:@"%.2f(%.2f) %ld(K) %.2f(vma) %.2f(vua)",tnowPrice,tpercent,(long)tKVolume,volumeAvr,valueAvr];
     }
     if (_stock) {
-        return _stock.code;
+        return @"...";
     }
     
     return nil;
@@ -99,14 +184,21 @@
 -(void)calcVolumeAverageRate
 {
     if (_stock && [_stock isValide]) {
-        _volumeAverage = (_stock.volume - _lastVolume)/_lastVolume;
+        if (_lastVolume && _lastVolume != _stock.volume) {
+            if (_volumeAverage == 0) {
+                _volumeAverage = (_stock.volume - _lastVolume);
+            }
+            _volumeAverage = ((_stock.volume - _lastVolume))/_volumeAverage;
+        }
         self.lastVolume = _stock.volume;
     }
 }
 -(void)calcValueAverageRate
 {
     if (_stock && [_stock isValide]) {
-        _valueAverage = (_stock.value - _lastValue)/_lastValue;
+        if (_lastValue) {
+            _valueAverage = (_stock.value - _lastValue)/_lastValue;
+        }
         self.lastValue = _stock.value;
     }
 }
@@ -118,55 +210,13 @@
 {
     self.datasource = nil;
     self.codeArray = nil;
-    [self btStop:self];
 }
 
-/**
- *  @author bob, 14-12-08 15:12:48
- *
- *  向standardUserDefaults中设置值
- *  注意:不能保存值或key为nil的键值对
- *
- *  @param value 被设置的值
- *  @param key   相关联的key
- *
- */
 
-+(void) standardUserDefaultsSetValue:(id)value forKey:(NSString *)key
-{
-    if (value != nil && key != nil) {
-        
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-        
-        [ud setObject:value forKey:key];
-        
-        [ud synchronize];
-    }
-}
-/**
- *  @author bob, 14-12-08 15:12:00
- *
- *  从standardUserDefaults中获取值
- *
- *  @param key 相关联的Key
- *
- *  @return 返回key 的值 或 nil
- */
-+(id) standardUserDefaultsGetValueforKey:(NSString *)key
-{
-    if ( key != nil ) {
-        
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-        
-        return [ud valueForKey:key];
-    }
-    
-    return nil;
-}
 
 -(void)loadCodes
 {
-    NSArray* array = [ViewController standardUserDefaultsGetValueforKey:CODES_SAVE_KEY];
+    NSArray* array = [StaticUtils standardUserDefaultsGetValueforKey:CODES_SAVE_KEY];
     if (array == nil || array.count ==0) {
         return;
     }
@@ -184,8 +234,14 @@
 
 -(void)saveCodes
 {
-    [ViewController standardUserDefaultsSetValue:self.codeArray forKey:CODES_SAVE_KEY];
+    [ StaticUtils standardUserDefaultsSetValue:self.codeArray forKey:CODES_SAVE_KEY];
 }
+
+//- (CGFloat)tableView:(UITableView *)tableView
+//heightForRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    return 60.0;
+//}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -200,10 +256,9 @@
         _codeArray = [[NSMutableArray alloc] initWithCapacity:3];
 //        [_codeArray addObject:@"600000"];
     }
-    
     UILongPressGestureRecognizer * longPressGr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressToDo:)];
     longPressGr.minimumPressDuration = 1.0;
-    [self.tableview addGestureRecognizer:longPressGr];
+//    [self.tableview addGestureRecognizer:longPressGr];
 }
 -(StockInfo*)parseResult:(NSString*)code result:(NSString*)result
 {
@@ -291,36 +346,10 @@
     }
 }
 
--(NSString*)buildCode:(NSString*)codeid{
-    
-    if(codeid != nil){
-        codeid=[ codeid stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-
-        if(codeid.length > 5){
-            char first = [codeid characterAtIndex:0];
-            
-            NSString* prefix=nil;
-            
-            switch(first){
-                case '6':
-                    prefix=@"sh";
-                    break;
-                case '3':
-                case '0':
-                    prefix=@"sz";
-                    break;
-                default:
-                    BOBLOG(@"BuildCodeError:invalid code !");
-            }
-            return [prefix stringByAppendingString:codeid];
-        }
-    }
-    return nil;
-}
 
 -(void)updateCodeInfo:(NSString*) strCode{
-    if ([self codeIsValid:strCode]) {
-        NSString* code = [self buildCode:strCode];
+    if ([StockInfoHelper codeIsValid:strCode]) {
+        NSString* code = [StockInfoHelper buildCode:strCode];
         AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
         manager.responseSerializer.acceptableContentTypes = [manager.responseSerializer.acceptableContentTypes setByAddingObject:@"application/x-javascript"];
         NSString* baseurl = @"http://hq.sinajs.cn/?_=1314426110204&list=";
@@ -387,7 +416,7 @@
         {
             if (buttonIndex == 1) {
                 NSString* code = [alert textFieldAtIndex:0].text;
-                if ([self codeIsValid:code] ) {
+                if ([StockInfoHelper codeIsValid:code] ) {
                     if (![self codeIsAdded:code]) {
                         [_codeArray addObject:code];
                         [self saveCodes];
@@ -430,15 +459,34 @@
 }
 
 #pragma tableview
+
+
+// Called after the user changes the selection.
+- (void)tableView:(UITableView *)tableView
+didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    StockInfoHelper* o =  _datasource[indexPath.row];
+    ConfigViewController* c = [[ConfigViewController alloc] initWithNibName:nil bundle:nil];
+    c.code = o.stock.code;
+    c.lb_code.text = o.stock.code;
+    [c.barTitle setTitle:o.stock.code];
+    [self presentViewController:c animated:NO completion:nil];
+}
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
     StockInfoHelper* fh = (StockInfoHelper*)_datasource[indexPath.row];
     TableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:TABLEVIEW_CELL_REUSE_ID];
-    [cell.textLabel setText:fh.constructCodeDisplayInfo];
+
     cell.lb_code.text = fh.stock.code;
     cell.lb_info.text = fh.constructCodeDisplayInfo;
+    cell.name.text = fh.stock.name;
+    if ([fh isBought]) {
+       cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f)",[fh CalcCurIncome]]];
+    }
+    BOBLOG(@"%f",cell.selectedBackgroundView.frame.size.width);
     return cell;
 }
 
@@ -469,25 +517,21 @@
 
 - (IBAction)btStart:(id)sender {
 //    [NSTimer timerWithTimeInterval:30.0 invocation:updateInfo repeats:YES ];
-    self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateInfo) userInfo:nil repeats:YES];
-    BOBLOG(@"updateTimer started!");
+    _bStarting = !_bStarting;
+    if (_bStarting) {
+        self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateInfo) userInfo:nil repeats:YES];
+        [_bt_monitor setTitle:@"stop" forState:UIControlStateNormal];
+        BOBLOG(@"updateTimer started!");
+    }else{
+        [self.updateTimer invalidate];
+        self.updateTimer = nil;
+        [_bt_monitor setTitle:@"start" forState:UIControlStateNormal];
+        BOBLOG(@"updateTimer stoped!");
+    }
+
 }
 
-- (IBAction)btStop:(id)sender {
-    
-    [self.updateTimer invalidate];
-    self.updateTimer = nil;
-    BOBLOG(@"updateTimer stoped!");
-}
 
-- (BOOL)codeIsValid:(NSString*)code
-{
-    if (code == nil) return NO;
-    if (code.length != 6) return NO;
-    
-    
-    return YES;
-}
 -(void)viber
 {
     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
