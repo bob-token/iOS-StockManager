@@ -163,6 +163,22 @@
     }
     return nil;
 }
+
+/**
+ *  @author bob, 14-12-19 12:12:30
+ *
+ *  计算额的增量平均值除以量的增量平均值
+ *
+ *  @return 计算结果或0
+ */
+-(float)getPercentVaRateVm
+{
+    if (_volumeAverage && _valueAverage) {
+        return _valueAverage/_volumeAverage;
+    }
+    return 1;
+}
+
 -(float) CalcCurIncomeRate
 {
     float curIncome = [self CalcCurIncome];
@@ -217,7 +233,8 @@
     if (_stock && [_stock isValide]) {
         if (_stock.volume != 0 && _lastVolume != 0) {
             if (_stock.volume != _lastVolume) {
-                _volumeAverage = (float)_stock.volume/_lastVolume -1;
+                float tmp = (float)_stock.volume/_lastVolume -1;
+                _volumeAverage = (tmp+_volumeAverage)/2 ;
             }
         }
         self.lastVolume = _stock.volume;
@@ -228,7 +245,8 @@
     if (_stock && [_stock isValide]) {
         if (_stock.value!= 0 && _lastValue!= 0) {
             if (_stock.value!= _lastValue) {
-                _valueAverage = (float)_stock.value/_lastValue -1;
+                float tmp = (float)_stock.value/_lastValue -1;
+                _valueAverage = (tmp+_valueAverage)/2;
             }
         }
         self.lastValue = _stock.value;
@@ -527,7 +545,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     cell.lb_code.text = fh.stock.code;
     cell.name.text = fh.stock.name;
     cell.lb_info.text = fh.constructCodeDisplayInfo;
-    cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.2f%%vma %.2f%%vua",[fh.stock getCurDealCostRate], fh.volumeAverage*100,fh.valueAverage*100];
+    cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.3f(ua/ma)",[fh.stock getCurDealCostRate], [fh getPercentVaRateVm]];
     if ([fh isBought]) {
        cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
     }
@@ -539,8 +557,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 1;
 }
-
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate;
+{
     [self refresh];
 }
 

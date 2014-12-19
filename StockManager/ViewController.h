@@ -62,9 +62,9 @@
 @interface StockInfoHelper : NSObject
 @property (nonatomic, strong)StockInfo* stock;
 @property (nonatomic,assign)NSInteger lastVolume;
-@property (nonatomic,assign)float volumeAverage;
+@property (nonatomic,assign)float volumeAverage; //量的增量平均值
 @property (nonatomic,assign)NSInteger lastValue;
-@property (nonatomic,assign)float valueAverage;
+@property (nonatomic,assign)float valueAverage;//额的增量平均值
 
 -(id)initWithCode:(NSString*)code;
 -(id)initWithStockInfo:(StockInfo*)stock;
