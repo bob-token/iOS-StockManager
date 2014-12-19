@@ -577,6 +577,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     MYAlertView* alert = [[MYAlertView alloc] initWithTitle:@"请输入" message:nil delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
 
     alert.alertViewStyle =  UIAlertViewStylePlainTextInput;
+    [[alert textFieldAtIndex:0] setKeyboardType:UIKeyboardTypeNumberPad];
     alert.typeId = ALERT_ID_ADD;
     [alert show];
     
