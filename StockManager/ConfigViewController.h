@@ -13,8 +13,10 @@
 #define VOLUME_TAG @"volume"
 #define PERCENT_OF_STOPLOSS_TAG @"percentOfStopLoss"
 #define PERCENT_OF_PROFITONLY_TAG @"percentOfProfitOlny"
+#define TIME_TAG @"time"
 
 @interface ConfigViewController : UIViewController
+@property (strong, nonatomic) IBOutlet UITextField *lb_time;
 @property (strong, nonatomic) IBOutlet UITextField *lb_price;
 @property (strong, nonatomic) IBOutlet UITextField *lb_volume;
 @property (strong, nonatomic) IBOutlet UITextField *lb_cost;
@@ -23,5 +25,7 @@
 @property (strong, nonatomic) IBOutlet UINavigationBar *nb_topbar;
 @property (strong, nonatomic) IBOutlet UINavigationItem *barTitle;
 - (IBAction)back:(id)sender;
+- (IBAction)priceEditingEnd:(id)sender;
+- (IBAction)volumeEditingEnd:(id)sender;
 +(NSDictionary*)getCodeConfigInfo:(NSString*)code;
 @end

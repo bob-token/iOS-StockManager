@@ -51,4 +51,37 @@
     
     return nil;
 }
++(NSString*)removeCharacter:(NSString*)org withInString:(NSString*)string
+{
+    NSString* str = [org copy];
+    if (string && org) {
+        for (NSInteger i = 0; i < string.length; i++) {
+            char a = [string characterAtIndex:i];
+            NSString *s =[NSString stringWithFormat:@"%c",a];
+            str = [str stringByReplacingOccurrencesOfString:s withString:@""];
+        }
+    }
+    return str;
+}
+
++(id)getTime:(NSInteger)flag
+{
+    NSString* date;
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+    NSString* format = @"YYYY-MM-dd hh:mm:ss";
+    [formatter setDateFormat:format];
+    date = [formatter stringFromDate:[NSDate date]];
+    switch (flag) {
+        case TIME_FORMAT_YYYY_MM_dd_SPACE_hh_mm_ss:
+            break;
+        case TIME_FORMAT_YYYYMMddhhmmss:
+        {
+            date = [StaticUtils removeCharacter:date withInString:@":- "];
+        }break;
+        default:
+            break;
+    }
+    return date;
+}
+
 @end

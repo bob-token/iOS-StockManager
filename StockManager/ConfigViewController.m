@@ -77,6 +77,7 @@
         [dic setValue:_lb_volume.text forKey:VOLUME_TAG];
         [dic setValue:_lb_percentOfStopLoss.text forKey:PERCENT_OF_STOPLOSS_TAG];
         [dic setValue:_percentOfprofitOnly.text forKey:PERCENT_OF_PROFITONLY_TAG];
+        [dic setValue:_lb_time.text forKey:TIME_TAG];
         [StaticUtils standardUserDefaultsSetValue:dic forKey:[self getCode]];
     }
 }
@@ -96,6 +97,7 @@
         if (dic != nil) {
             _lb_price.text = [dic valueForKey:PRICE_TAG];
             _lb_volume.text = [dic valueForKey:VOLUME_TAG];
+            _lb_time.text = [dic valueForKey:TIME_TAG];
            float cost = [[dic valueForKey:PRICE_TAG] floatValue]*[[dic valueForKey:VOLUME_TAG] floatValue];
             _lb_cost.text = [NSString stringWithFormat:@"%.2f",cost];
             _lb_percentOfStopLoss.text = [dic valueForKey:PERCENT_OF_STOPLOSS_TAG];
@@ -114,5 +116,21 @@
     
     [self saveConfig];
     [self dismissViewControllerAnimated:NO completion:nil];
+}
+- (void)updateTime
+{
+    _lb_time.text = [StaticUtils getTime:TIME_FORMAT_YYYYMMddhhmmss];
+}
+
+- (IBAction)priceEditingEnd:(id)sender {
+    if (_lb_time.text.length == 0) {
+        [self updateTime];
+    }
+}
+
+- (IBAction)volumeEditingEnd:(id)sender {
+    if (_lb_time.text.length == 0) {
+        [self updateTime];
+    }
 }
 @end

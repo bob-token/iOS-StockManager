@@ -8,8 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+#define    TIME_FORMAT_YYYY_MM_dd_SPACE_hh_mm_ss 0
+#define    TIME_FORMAT_YYYYMMddhhmmss 1
+
+
 @interface StaticUtils : NSObject
 +(void) standardUserDefaultsSetValue:(id)value forKey:(NSString *)key;
 +(id) standardUserDefaultsGetValueforKey:(NSString *)key;
-
++(id)getTime:(NSInteger)flag;
 @end
