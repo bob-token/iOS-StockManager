@@ -15,7 +15,6 @@
 
 - (IBAction)btAdd:(id)sender;
 - (IBAction)btStart:(id)sender;
-- (IBAction)btrefresh:(id)sender;
 
 
 @property (nonatomic, retain)NSMutableArray* datasource;

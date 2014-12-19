@@ -269,7 +269,7 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     if (!_bStarting) {
-        [self btrefresh:self];
+        [self refresh];
         [self btStart:self];
     }
 }
@@ -540,6 +540,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     return 1;
 }
 
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    [self refresh];
+}
+
 - (NSInteger)tableView:(UITableView *)tableView
  numberOfRowsInSection:(NSInteger)section
 {
@@ -574,11 +578,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 
 }
 
-- (IBAction)btrefresh:(id)sender {
+- (void)refresh
+{
     dispatch_async(dispatch_get_main_queue(), ^{
         [self updateInfo];
     });
 }
+
 
 
 -(void)viber
