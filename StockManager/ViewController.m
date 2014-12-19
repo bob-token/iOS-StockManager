@@ -49,7 +49,17 @@
 
 -(float)getPercent
 {
-    return (self.nowPrice - self.closePrice)*100/self.closePrice;
+    if ([self isValide]) {
+        return (self.nowPrice - self.closePrice)*100/self.closePrice;
+    }
+    return 0;
+}
+-(float)getCurDealCostRate
+{
+    if ([self isValide]) {
+        return _nowPrice*_volume/_value;
+    }
+    return 0;
 }
 
 -(BOOL)isValide
@@ -131,7 +141,7 @@
     if ([_stock isValide]  ) {
         NSDictionary* dic = [ConfigViewController getCodeConfigInfo:_stock.code];
         float buyPrice = [[dic valueForKey:PRICE_TAG] floatValue];
-        int total = [[dic valueForKey:VOLUME_TAG] integerValue];
+        NSInteger total = [[dic valueForKey:VOLUME_TAG] integerValue];
         if (buyPrice > 0 && total > 0) {
             return YES;
         }
@@ -139,19 +149,42 @@
     return NO;
 }
 
+-(float) getCost
+{
+    float buyPrice = [[self getBoughtDetail:PRICE_TAG] floatValue];
+    NSInteger total = [[self getBoughtDetail:VOLUME_TAG] integerValue];
+    return buyPrice*total;
+}
+-(id)getBoughtDetail:(NSString*)detailTag
+{
+    NSDictionary* dic = [ConfigViewController getCodeConfigInfo:_stock.code];
+    if (dic && detailTag) {
+        return [dic valueForKey:detailTag];
+    }
+    return nil;
+}
+-(float) CalcCurIncomeRate
+{
+    float curIncome = [self CalcCurIncome];
+    float cost = [self getCost];
+    if (curIncome != 0 && cost != 0) {
+        return curIncome/cost;
+    }
+    return 0;
+}
+
 -(float) CalcCurIncome
 {
     if ([_stock isValide]) {
         float curPrice = _stock.nowPrice;
-        NSDictionary* dic = [ConfigViewController getCodeConfigInfo:_stock.code];
-        float buyPrice = [[dic valueForKey:PRICE_TAG] floatValue];
-        int total = [[dic valueForKey:VOLUME_TAG] integerValue];
+        float buyPrice = [[self getBoughtDetail:PRICE_TAG] floatValue];
+        NSInteger total = [[self getBoughtDetail:VOLUME_TAG] integerValue];
         return [StockInfoHelper CalcIncome:_stock.code buyprice:buyPrice sellprice:curPrice total:total];
     }
 
     return 0;
 }
-+(float) CalcIncome:(NSString*) code buyprice:(float) buyprice sellprice:(float)sellprice total:(int) total
++(float) CalcIncome:(NSString*) code buyprice:(float) buyprice sellprice:(float)sellprice total:(NSInteger) total
 {
     float yinhuatax=(float) 0.001;
     float servicechange=(float) 0.002;
@@ -173,7 +206,7 @@
         NSInteger tKVolume = _stock.volume/1000;
         float volumeAvr = _volumeAverage;
         float valueAvr = _valueAverage;
-        return [NSString stringWithFormat:@"%.2f(%.2f) %ld(K) %.2f(vma) %.2f(vua)",tnowPrice,tpercent,(long)tKVolume,volumeAvr,valueAvr];
+        return [NSString stringWithFormat:@"%.2f(%.2f)(%.3f) %ld(K) %.2f(vma) %.2f(vua)",tnowPrice,tpercent,[_stock getCurDealCostRate],(long)tKVolume,volumeAvr,valueAvr];
     }
     if (_stock) {
         return @"...";
@@ -184,11 +217,10 @@
 -(void)calcVolumeAverageRate
 {
     if (_stock && [_stock isValide]) {
-        if (_lastVolume && _lastVolume != _stock.volume) {
-            if (_volumeAverage == 0) {
-                _volumeAverage = (_stock.volume - _lastVolume);
+        if (_stock.volume != 0 && _lastVolume != 0) {
+            if (_stock.volume != _lastVolume) {
+                _volumeAverage = _stock.volume/_lastVolume;
             }
-            _volumeAverage = ((_stock.volume - _lastVolume))/_volumeAverage;
         }
         self.lastVolume = _stock.volume;
     }
@@ -196,8 +228,10 @@
 -(void)calcValueAverageRate
 {
     if (_stock && [_stock isValide]) {
-        if (_lastValue) {
-            _valueAverage = (_stock.value - _lastValue)/_lastValue;
+        if (_stock.value!= 0 && _lastValue!= 0) {
+            if (_stock.value!= _lastValue) {
+                _valueAverage = _stock.value/_lastValue;
+            }
         }
         self.lastValue = _stock.value;
     }
@@ -211,8 +245,6 @@
     self.datasource = nil;
     self.codeArray = nil;
 }
-
-
 
 -(void)loadCodes
 {
@@ -236,13 +268,13 @@
 {
     [ StaticUtils standardUserDefaultsSetValue:self.codeArray forKey:CODES_SAVE_KEY];
 }
-
-//- (CGFloat)tableView:(UITableView *)tableView
-//heightForRowAtIndexPath:(NSIndexPath *)indexPath
-//{
-//    return 60.0;
-//}
-
+- (void)viewWillAppear:(BOOL)animated
+{
+    if (!_bStarting) {
+        [self btrefresh:self];
+        [self btStart:self];
+    }
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     [_tableview registerClass:TableViewCell.class forCellReuseIdentifier:TABLEVIEW_CELL_REUSE_ID];
@@ -258,7 +290,7 @@
     }
     UILongPressGestureRecognizer * longPressGr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressToDo:)];
     longPressGr.minimumPressDuration = 1.0;
-//    [self.tableview addGestureRecognizer:longPressGr];
+    [self.tableview addGestureRecognizer:longPressGr];
 }
 -(StockInfo*)parseResult:(NSString*)code result:(NSString*)result
 {
@@ -282,6 +314,17 @@
         info.OneBuyPrice = [inf[index++] floatValue];
         info.OneSellPrice = [inf[index++] floatValue];
         info.Volume = [inf[index++] integerValue];
+        info.value = [inf[index++] integerValue];
+        info.buyOneVolume = [inf[index++] integerValue];
+        info.buyTwoVolume = [inf[index++] integerValue];
+        info.buyThirdVolume = [inf[index++] integerValue];
+        info.buyFourVolume = [inf[index++] integerValue];
+        info.buyFiveVolume = [inf[index++] integerValue];
+        info.sellOneVolume = [inf[index++] integerValue];
+        info.sellTwoVolume = [inf[index++] integerValue];
+        info.sellThirdVolume = [inf[index++] integerValue];
+        info.sellFourVolume = [inf[index++] integerValue];
+        info.sellFiveVolume = [inf[index++] integerValue];
         info.date = inf[31];
         info.time = inf[32];
         return info;
@@ -341,6 +384,11 @@
         
         [fh calcValueAverageRate];
         [fh calcVolumeAverageRate];
+        float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
+        float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
+        if ([fh CalcCurIncomeRate] > profit || [fh CalcCurIncomeRate] < loss*-1) {
+            [self viber];
+        }
         
         [_tableview reloadData];
     }
@@ -468,8 +516,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     
     StockInfoHelper* o =  _datasource[indexPath.row];
     ConfigViewController* c = [[ConfigViewController alloc] initWithNibName:nil bundle:nil];
-    c.code = o.stock.code;
-    c.lb_code.text = o.stock.code;
     [c.barTitle setTitle:o.stock.code];
     [self presentViewController:c animated:NO completion:nil];
 }
@@ -484,7 +530,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     cell.lb_info.text = fh.constructCodeDisplayInfo;
     cell.name.text = fh.stock.name;
     if ([fh isBought]) {
-       cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f)",[fh CalcCurIncome]]];
+       cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
     }
     BOBLOG(@"%f",cell.selectedBackgroundView.frame.size.width);
     return cell;
@@ -514,9 +560,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     [alert show];
     
 }
-
 - (IBAction)btStart:(id)sender {
-//    [NSTimer timerWithTimeInterval:30.0 invocation:updateInfo repeats:YES ];
     _bStarting = !_bStarting;
     if (_bStarting) {
         self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateInfo) userInfo:nil repeats:YES];
@@ -529,6 +573,12 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
         BOBLOG(@"updateTimer stoped!");
     }
 
+}
+
+- (IBAction)btrefresh:(id)sender {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateInfo];
+    });
 }
 
 

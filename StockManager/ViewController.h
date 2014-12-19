@@ -15,6 +15,7 @@
 
 - (IBAction)btAdd:(id)sender;
 - (IBAction)btStart:(id)sender;
+- (IBAction)btrefresh:(id)sender;
 
 
 @property (nonatomic, retain)NSMutableArray* datasource;
@@ -46,12 +47,12 @@
 @property (nonatomic, assign)NSInteger buyTwoVolume;
 @property (nonatomic, assign)NSInteger buyThirdVolume;
 @property (nonatomic, assign)NSInteger buyFourVolume;
-@property (nonatomic, assign)NSInteger buyFiveVolue;
+@property (nonatomic, assign)NSInteger buyFiveVolume;
 @property (nonatomic, assign)NSInteger sellOneVolume;
 @property (nonatomic, assign)NSInteger sellTwoVolume;
 @property (nonatomic, assign)NSInteger sellThirdVolume;
 @property (nonatomic, assign)NSInteger sellFourVolume;
-@property (nonatomic, assign)NSInteger sellFiveVolue;
+@property (nonatomic, assign)NSInteger sellFiveVolume;
 @property (nonatomic, strong)NSString* date;
 @property (nonatomic, strong)NSString* time;
 -(id)initWithCode:(NSString*)code;
@@ -72,4 +73,5 @@
 -(void)calcValueAverageRate;
 -(NSString*)constructCodeDisplayInfo;
 +(BOOL)isSHStock:(NSString*)code;
++ (BOOL)codeIsValid:(NSString*)code;
 @end
