@@ -14,7 +14,6 @@
 #import "StaticUtils.h"
 
 
-
 #define ALERT_ID_DELETE 1
 #define ALERT_ID_ADD    2
 
@@ -557,9 +556,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 1;
 }
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate;
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset NS_AVAILABLE_IOS(5_0)
 {
-    [self refresh];
+    if(targetContentOffset->y == 0)
+        [self refresh];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView
