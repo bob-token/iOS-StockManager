@@ -204,9 +204,7 @@
         float tpercent = [_stock getPercent];
         float tnowPrice = _stock.nowPrice;
         NSInteger tKVolume = _stock.volume/1000;
-        float volumeAvr = _volumeAverage;
-        float valueAvr = _valueAverage;
-        return [NSString stringWithFormat:@"%.2f(%.2f)(%.3f) %ld(K) %.2f(vma) %.2f(vua)",tnowPrice,tpercent,[_stock getCurDealCostRate],(long)tKVolume,volumeAvr,valueAvr];
+        return [NSString stringWithFormat:@"%.2f(%.2f) %ld(K)",tnowPrice,tpercent,(long)tKVolume];
     }
     if (_stock) {
         return @"...";
@@ -219,7 +217,7 @@
     if (_stock && [_stock isValide]) {
         if (_stock.volume != 0 && _lastVolume != 0) {
             if (_stock.volume != _lastVolume) {
-                _volumeAverage = _stock.volume/_lastVolume;
+                _volumeAverage = (float)_stock.volume/_lastVolume -1;
             }
         }
         self.lastVolume = _stock.volume;
@@ -230,7 +228,7 @@
     if (_stock && [_stock isValide]) {
         if (_stock.value!= 0 && _lastValue!= 0) {
             if (_stock.value!= _lastValue) {
-                _valueAverage = _stock.value/_lastValue;
+                _valueAverage = (float)_stock.value/_lastValue -1;
             }
         }
         self.lastValue = _stock.value;
@@ -527,8 +525,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     TableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:TABLEVIEW_CELL_REUSE_ID];
 
     cell.lb_code.text = fh.stock.code;
-    cell.lb_info.text = fh.constructCodeDisplayInfo;
     cell.name.text = fh.stock.name;
+    cell.lb_info.text = fh.constructCodeDisplayInfo;
+    cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.2f%%vma %.2f%%vua",[fh.stock getCurDealCostRate], fh.volumeAverage*100,fh.valueAverage*100];
     if ([fh isBought]) {
        cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
     }
