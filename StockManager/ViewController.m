@@ -170,10 +170,17 @@
  *
  *  @return 计算结果或0
  */
--(float)getPercentVaRateVm
+-(float)getAverageVaRateVm
 {
     if (_volumeAverage && _valueAverage) {
         return _valueAverage/_volumeAverage;
+    }
+    return 1;
+}
+-(float)getLastVaRateVm
+{
+    if (_valueLastIncreaseRate && _volumeLastIncreaseRate) {
+        return _valueLastIncreaseRate/_volumeLastIncreaseRate;
     }
     return 1;
 }
@@ -233,6 +240,7 @@
         if (_stock.volume != 0 && _lastVolume != 0) {
             if (_stock.volume != _lastVolume) {
                 float tmp = (float)_stock.volume/_lastVolume -1;
+                _volumeLastIncreaseRate = tmp;
                 _volumeAverage = (tmp+_volumeAverage)/2 ;
             }
         }
@@ -245,6 +253,7 @@
         if (_stock.value!= 0 && _lastValue!= 0) {
             if (_stock.value!= _lastValue) {
                 float tmp = (float)_stock.value/_lastValue -1;
+                _valueLastIncreaseRate = tmp;
                 _valueAverage = (tmp+_valueAverage)/2;
             }
         }
@@ -532,7 +541,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     StockInfoHelper* o =  _datasource[indexPath.row];
     ConfigViewController* c = [[ConfigViewController alloc] initWithNibName:nil bundle:nil];
     [c.barTitle setTitle:o.stock.code];
-    [self presentViewController:c animated:NO completion:nil];
+    [self presentViewController:c animated:YES completion:nil];
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -544,7 +553,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     cell.lb_code.text = fh.stock.code;
     cell.name.text = fh.stock.name;
     cell.lb_info.text = fh.constructCodeDisplayInfo;
-    cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.3f(ua/ma)",[fh.stock getCurDealCostRate], [fh getPercentVaRateVm]];
+    cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.3f(ua/ma) %.3f(lua/lma)",[fh.stock getCurDealCostRate], [fh getAverageVaRateVm], [fh getLastVaRateVm]];
     if ([fh isBought]) {
        cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
     }
