@@ -22,10 +22,16 @@
 @property (strong, nonatomic) IBOutlet UITextField *lb_cost;
 @property (strong, nonatomic) IBOutlet UITextField *lb_percentOfStopLoss;
 @property (strong, nonatomic) IBOutlet UITextField *percentOfprofitOnly;
+@property (strong, nonatomic) IBOutlet UITextField *priceOfLoss;
+@property (strong, nonatomic) IBOutlet UITextField *priceOfProfit;
 @property (strong, nonatomic) IBOutlet UINavigationBar *nb_topbar;
 @property (strong, nonatomic) IBOutlet UINavigationItem *barTitle;
 - (IBAction)back:(id)sender;
 - (IBAction)priceEditingEnd:(id)sender;
 - (IBAction)volumeEditingEnd:(id)sender;
+- (IBAction)stopLossRateEditingEnd:(id)sender;
+- (IBAction)profitOnlyRateEditingEnd:(id)sender;
+- (IBAction)StopLostPriceEditingEnd:(id)sender;
+- (IBAction)profitOnlyPriceEditingEnd:(id)sender;
 +(NSDictionary*)getCodeConfigInfo:(NSString*)code;
 @end

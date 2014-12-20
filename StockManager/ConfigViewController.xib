@@ -15,6 +15,8 @@
                 <outlet property="lb_volume" destination="FX4-vC-Wdy" id="imk-ne-AW9"/>
                 <outlet property="nb_topbar" destination="soD-YF-PbR" id="AY8-dF-VzQ"/>
                 <outlet property="percentOfprofitOnly" destination="soj-hG-Oad" id="TlU-Yy-m6n"/>
+                <outlet property="priceOfLoss" destination="CP0-Zh-cK6" id="fy4-bu-zFV"/>
+                <outlet property="priceOfProfit" destination="O2R-BV-fo8" id="rUa-q2-Hcb"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="MJ8-1R-rYa"/>
             </connections>
         </placeholder>
@@ -61,6 +63,9 @@
                     <rect key="frame" x="71" y="334" width="97" height="30"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits" keyboardType="numbersAndPunctuation"/>
+                    <connections>
+                        <action selector="profitOnlyRateEditingEnd:" destination="-1" eventType="editingDidEnd" id="NiD-Ou-gkJ"/>
+                    </connections>
                 </textField>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="价格" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="M11-yb-Lm0">
                     <rect key="frame" x="19" y="115" width="42" height="21"/>
@@ -96,6 +101,9 @@
                     <rect key="frame" x="71" y="281" width="97" height="30"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits" keyboardType="numbersAndPunctuation"/>
+                    <connections>
+                        <action selector="stopLossRateEditingEnd:" destination="-1" eventType="editingDidEnd" id="WVl-5H-c6Q"/>
+                    </connections>
                 </textField>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="时间" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pvW-qN-Rbd">
                     <rect key="frame" x="19" y="192" width="42" height="21"/>
@@ -107,6 +115,22 @@
                     <rect key="frame" x="71" y="188" width="97" height="30"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
+                </textField>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="CP0-Zh-cK6">
+                    <rect key="frame" x="176" y="281" width="97" height="30"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                    <connections>
+                        <action selector="StopLostPriceEditingEnd:" destination="-1" eventType="editingDidEnd" id="3Hl-TJ-1ex"/>
+                    </connections>
+                </textField>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="O2R-BV-fo8">
+                    <rect key="frame" x="176" y="330" width="97" height="30"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                    <connections>
+                        <action selector="profitOnlyPriceEditingEnd:" destination="-1" eventType="editingDidEnd" id="NeG-I0-3C8"/>
+                    </connections>
                 </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>

@@ -23,9 +23,9 @@
     self = [super initWithNibName:nil bundle:(NSBundle*)nibNameOrNil];
     if (self) {
         self.lb_price = [[UITextField alloc] init];
-        self.lb_volume = [[UITextField alloc] init];
+//        self.lb_volume = [[UITextField alloc] init];
         [self.view addSubview:self.lb_price];
-        [self.view addSubview:self.lb_volume];
+//        [self.view addSubview:self.lb_volume];
     }
     return self;
 }
@@ -89,6 +89,31 @@
     }
     return nil;
 }
+-(void)updateRateByPrice
+{
+    float stopLostRate =1-[_priceOfLoss.text floatValue]/[_lb_price.text floatValue];
+    _lb_percentOfStopLoss.text = [NSString stringWithFormat:@"%.2f",stopLostRate];
+    
+    float profitOnlyRate = [_priceOfProfit.text floatValue]/[_lb_price.text floatValue] -1;
+    _percentOfprofitOnly.text = [NSString stringWithFormat:@"%.2f",profitOnlyRate];
+}
+-(void)updatePriceByRate{
+    float stopLost = [_lb_price.text floatValue]*(1-[_lb_percentOfStopLoss.text floatValue]);
+    _priceOfLoss.text = [NSString stringWithFormat:@"%.2f",stopLost];
+    float profitOnly = [_lb_price.text floatValue]*(1+[_percentOfprofitOnly.text floatValue]);
+    _priceOfProfit.text = [NSString stringWithFormat:@"%.2f",profitOnly];
+    
+}
+-(float)cost
+{
+    NSDictionary* dic = [StaticUtils standardUserDefaultsGetValueforKey:[self getCode]];
+    float cost = [[dic valueForKey:PRICE_TAG] floatValue]*[[dic valueForKey:VOLUME_TAG] floatValue];
+    return cost;
+}
+-(void)updateCostTextFild
+{
+    _lb_cost.text = [NSString stringWithFormat:@"%.2f",[self cost]];
+}
 
 -(void)loadConfig
 {
@@ -98,8 +123,7 @@
             _lb_price.text = [dic valueForKey:PRICE_TAG];
             _lb_volume.text = [dic valueForKey:VOLUME_TAG];
             _lb_time.text = [dic valueForKey:TIME_TAG];
-           float cost = [[dic valueForKey:PRICE_TAG] floatValue]*[[dic valueForKey:VOLUME_TAG] floatValue];
-            _lb_cost.text = [NSString stringWithFormat:@"%.2f",cost];
+            [self updateCostTextFild];
             _lb_percentOfStopLoss.text = [dic valueForKey:PERCENT_OF_STOPLOSS_TAG];
             _percentOfprofitOnly.text = [dic valueForKey:PERCENT_OF_PROFITONLY_TAG];
             if (_lb_percentOfStopLoss.text.length == 0) {
@@ -108,6 +132,7 @@
             if (_percentOfprofitOnly.text.length == 0) {
                 _percentOfprofitOnly.text = @"0.05";
             }
+            [self updatePriceByRate];
         }
     }
 }
@@ -126,11 +151,32 @@
     if (_lb_time.text.length == 0) {
         [self updateTime];
     }
+    [self saveConfig];
+    [self loadConfig];
 }
 
 - (IBAction)volumeEditingEnd:(id)sender {
     if (_lb_time.text.length == 0) {
         [self updateTime];
     }
+    [self saveConfig];
+    [self loadConfig];
+    
+}
+
+- (IBAction)stopLossRateEditingEnd:(id)sender {
+    [self updatePriceByRate];
+}
+
+- (IBAction)profitOnlyRateEditingEnd:(id)sender {
+    [self updatePriceByRate];
+}
+
+- (IBAction)StopLostPriceEditingEnd:(id)sender {
+    [self updateRateByPrice];
+}
+
+- (IBAction)profitOnlyPriceEditingEnd:(id)sender {
+    [self updateRateByPrice];
 }
 @end
