@@ -9,13 +9,14 @@
 #import <UIKit/UIKit.h>
 
 @interface ViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
+//@interface ViewController : UITableViewController<UITableViewDataSource,UITableViewDelegate>
 @property (strong, nonatomic) IBOutlet UITableView *tableview;
 @property (strong, nonatomic) IBOutlet UIButton *bt_monitor;
 @property (nonatomic, assign) BOOL bStarting;
 
 - (IBAction)btAdd:(id)sender;
 - (IBAction)btStart:(id)sender;
-
+- (void)backgroundFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler;
 
 @property (nonatomic, retain)NSMutableArray* datasource;
 @property (nonatomic, retain)NSMutableArray* codeArray;
@@ -68,11 +69,11 @@
 @property (nonatomic,assign)float valueAverage;//额的增量平均值
 @property (nonatomic,assign)float valueLastIncreaseRate;//额的最后增量比
 
++(BOOL)isSHStock:(NSString*)code;
++ (BOOL)codeIsValid:(NSString*)code;
 -(id)initWithCode:(NSString*)code;
 -(id)initWithStockInfo:(StockInfo*)stock;
 -(void)calcVolumeAverageRate;
 -(void)calcValueAverageRate;
 -(NSString*)constructCodeDisplayInfo;
-+(BOOL)isSHStock:(NSString*)code;
-+ (BOOL)codeIsValid:(NSString*)code;
 @end

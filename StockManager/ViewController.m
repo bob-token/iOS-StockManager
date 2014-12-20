@@ -6,7 +6,6 @@
 //  Copyright (c) 2014年 bob. All rights reserved.
 //
 
-#import <AudioToolbox/AudioToolbox.h>
 #import "ViewController.h"
 #import "AFNetworking.h"
 #import "TableViewCell.h"
@@ -411,7 +410,8 @@
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
         if ([fh CalcCurIncomeRate] > profit || [fh CalcCurIncomeRate] < loss*-1) {
-            [self viber];
+            NSString* info = fh.stock.name;
+            [StaticUtils NotifyUser:[info stringByAppendingFormat:@" %.2f %.2f",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
         }
         
         [_tableview reloadData];
@@ -419,13 +419,21 @@
 }
 
 
--(void)updateCodeInfo:(NSString*) strCode{
+-(NSString*)getCodeInfoUrl:(NSString*) strCode
+{
     if ([StockInfoHelper codeIsValid:strCode]) {
         NSString* code = [StockInfoHelper buildCode:strCode];
-        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-        manager.responseSerializer.acceptableContentTypes = [manager.responseSerializer.acceptableContentTypes setByAddingObject:@"application/x-javascript"];
         NSString* baseurl = @"http://hq.sinajs.cn/?_=1314426110204&list=";
         NSString* url = [baseurl stringByAppendingString:code];
+        return url;
+    }
+    return nil;
+}
+-(void)updateCodeInfo:(NSString*) strCode{
+    if ([StockInfoHelper codeIsValid:strCode]) {
+        NSString* url = [self getCodeInfoUrl:strCode];
+        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+        manager.responseSerializer.acceptableContentTypes = [manager.responseSerializer.acceptableContentTypes setByAddingObject:@"application/x-javascript"];
         NSStringEncoding enc = CFStringConvertEncodingToNSStringEncoding (kCFStringEncodingGB_18030_2000 );
         manager.responseSerializer = [[AFHTTPResponseSerializer alloc] init];
 //        manager.responseSerializer.stringEncoding = enc;
@@ -613,11 +621,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     });
 }
 
-
-
--(void)viber
+- (void)backgroundFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler;
 {
-    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+    [self updateInfo];
+//    completionHandler(UIBackgroundFetchResultNoData);
 }
-
 @end
