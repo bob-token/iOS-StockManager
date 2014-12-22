@@ -106,8 +106,7 @@
 }
 -(float)cost
 {
-    NSDictionary* dic = [StaticUtils standardUserDefaultsGetValueforKey:[self getCode]];
-    float cost = [[dic valueForKey:PRICE_TAG] floatValue]*[[dic valueForKey:VOLUME_TAG] floatValue];
+    float cost = [_lb_price.text floatValue]*[_lb_volume.text floatValue];
     return cost;
 }
 -(void)updateCostTextFild
@@ -140,7 +139,7 @@
 - (IBAction)back:(id)sender {
     
     [self saveConfig];
-    [self dismissViewControllerAnimated:NO completion:nil];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 - (void)updateTime
 {

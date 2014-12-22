@@ -265,6 +265,7 @@
 
 - (void)dealloc
 {
+    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
     self.datasource = nil;
     self.codeArray = nil;
 }
@@ -300,6 +301,9 @@
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
+    //禁止自动锁屏
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+    
     [_tableview registerClass:TableViewCell.class forCellReuseIdentifier:TABLEVIEW_CELL_REUSE_ID];
     // Do any additional setup after loading the view, typically from a nib.
     if (_datasource ==nil) {
@@ -392,6 +396,26 @@
     return  index;
 }
 
+-(void)checkUserCondition:(StockInfoHelper*)fh
+{
+    if (fh && [fh.stock isValide]) {
+        float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
+        float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
+        if ([fh CalcCurIncomeRate] > profit || [fh CalcCurIncomeRate] < loss*-1) {
+            NSString* info = fh.stock.name;
+            [StaticUtils NotifyUser:[info stringByAppendingFormat:@" %.2f %.2f",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
+        }
+        
+        fh.warnningType = 0;
+        
+        if ([fh CalcCurIncomeRate] > profit) {
+            fh.warnningType = 1;
+        }
+        if ([fh CalcCurIncomeRate] < loss*-1) {
+            fh.warnningType = -1;
+        }
+    }
+}
 -(void)parseCodeInfo:(NSString*)code info:(NSString*)info
 {
     StockInfo* f = [self parseResult:code result:info];
@@ -407,13 +431,7 @@
         
         [fh calcValueAverageRate];
         [fh calcVolumeAverageRate];
-        float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
-        float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
-        if ([fh CalcCurIncomeRate] > profit || [fh CalcCurIncomeRate] < loss*-1) {
-            NSString* info = fh.stock.name;
-            [StaticUtils NotifyUser:[info stringByAppendingFormat:@" %.2f %.2f",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
-        }
-        
+        [self checkUserCondition:fh];
         [_tableview reloadData];
     }
 }
@@ -565,6 +583,14 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     if ([fh isBought]) {
        cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
     }
+    UIColor *bgcolor = [UIColor clearColor];
+    if (fh.warnningType > 0) {
+        bgcolor = [UIColor redColor];
+    }else if (fh.warnningType < 0){
+        bgcolor = [UIColor greenColor];
+    }
+    cell.backgroundColor = bgcolor;
+    
     BOBLOG(@"%f",cell.selectedBackgroundView.frame.size.width);
     return cell;
 }

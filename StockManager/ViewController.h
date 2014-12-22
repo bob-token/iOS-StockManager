@@ -68,7 +68,7 @@
 @property (nonatomic,assign)NSInteger lastValue;
 @property (nonatomic,assign)float valueAverage;//额的增量平均值
 @property (nonatomic,assign)float valueLastIncreaseRate;//额的最后增量比
-
+@property (nonatomic,assign)NSInteger warnningType;//警告类w型
 +(BOOL)isSHStock:(NSString*)code;
 + (BOOL)codeIsValid:(NSString*)code;
 -(id)initWithCode:(NSString*)code;
