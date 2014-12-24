@@ -29,6 +29,67 @@
     }
     return self;
 }
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
+}
+
+- (void)keyboardWillShow:(NSNotification *)aNotification
+
+
+{
+    NSDictionary *userInfo = [aNotification userInfo];
+    CGRect keyboardRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    NSTimeInterval animationDuration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    
+    CGRect newFrame = self.view.frame;
+    newFrame.origin.y-= keyboardRect.size.height;
+    
+    [UIView beginAnimations:@"ResizeTextView" context:nil];
+    [UIView setAnimationDuration:animationDuration+0.2];
+    
+    self.view.frame = newFrame;  
+    
+    [UIView commitAnimations];  
+}
+-(void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIKeyboardWillHideNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIKeyboardWillShowNotification
+                                                  object:nil];
+}
+
+- (void)keyboardWillHide:(NSNotification *)aNotification
+{
+    NSDictionary *userInfo = [aNotification userInfo];
+    NSTimeInterval animationDuration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    CGRect keyboardRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    
+    CGRect newFrame = self.view.frame;
+    newFrame.origin.y += keyboardRect.size.height;
+    
+    [UIView beginAnimations:@"ResizeView" context:nil];
+    [UIView setAnimationDuration:animationDuration];
+    
+    self.view.frame = newFrame;
+    
+    [UIView commitAnimations];  
+}
+
 - (void)viewDidAppear:(BOOL)animated
 {
     [self loadConfig];
