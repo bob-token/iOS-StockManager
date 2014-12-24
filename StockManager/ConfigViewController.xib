@@ -12,6 +12,8 @@
                 <outlet property="lb_percentOfStopLoss" destination="VEA-7D-9Dd" id="2Uf-Lm-pHQ"/>
                 <outlet property="lb_price" destination="Kdc-Ka-y4M" id="Plv-VY-Caw"/>
                 <outlet property="lb_time" destination="c5t-oL-aXk" id="c5D-u0-DB0"/>
+                <outlet property="lb_vaRateVm_max" destination="iiK-YD-C2O" id="a71-uW-LvN"/>
+                <outlet property="lb_vaRateVm_min" destination="Tro-no-TBS" id="Tkh-Ix-66O"/>
                 <outlet property="lb_volume" destination="FX4-vC-Wdy" id="imk-ne-AW9"/>
                 <outlet property="nb_topbar" destination="soD-YF-PbR" id="AY8-dF-VzQ"/>
                 <outlet property="percentOfprofitOnly" destination="soj-hG-Oad" id="TlU-Yy-m6n"/>
@@ -125,12 +127,28 @@
                     </connections>
                 </textField>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="O2R-BV-fo8">
-                    <rect key="frame" x="176" y="330" width="97" height="30"/>
+                    <rect key="frame" x="176" y="334" width="97" height="30"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits" keyboardType="numbersAndPunctuation"/>
                     <connections>
                         <action selector="profitOnlyPriceEditingEnd:" destination="-1" eventType="editingDidEnd" id="NeG-I0-3C8"/>
                     </connections>
+                </textField>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="值量增比" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2fX-zb-5PK">
+                    <rect key="frame" x="19" y="378" width="75" height="21"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="max" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="iiK-YD-C2O">
+                    <rect key="frame" x="102" y="374" width="97" height="30"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" keyboardType="numbersAndPunctuation"/>
+                </textField>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="min" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Tro-no-TBS">
+                    <rect key="frame" x="207" y="374" width="97" height="30"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" keyboardType="numbersAndPunctuation"/>
                 </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>

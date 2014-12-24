@@ -78,6 +78,8 @@
         [dic setValue:_lb_percentOfStopLoss.text forKey:PERCENT_OF_STOPLOSS_TAG];
         [dic setValue:_percentOfprofitOnly.text forKey:PERCENT_OF_PROFITONLY_TAG];
         [dic setValue:_lb_time.text forKey:TIME_TAG];
+        [dic setValue:_lb_vaRateVm_max.text forKey:MAX_VAULE_RATE_VOLUME_INCREASE_TAG];
+        [dic setValue:_lb_vaRateVm_min.text forKey:MIN_VAULE_RATE_VOLUME_INCREASE_TAG];
         [StaticUtils standardUserDefaultsSetValue:dic forKey:[self getCode]];
     }
 }
@@ -132,6 +134,14 @@
                 _percentOfprofitOnly.text = @"0.05";
             }
             [self updatePriceByRate];
+            _lb_vaRateVm_max.text = [dic valueForKey:MAX_VAULE_RATE_VOLUME_INCREASE_TAG];
+            _lb_vaRateVm_min.text = [dic valueForKey:MIN_VAULE_RATE_VOLUME_INCREASE_TAG];
+            if (_lb_vaRateVm_max.text.length == 0) {
+                _lb_vaRateVm_max.text = @"1.030";
+            }
+            if (_lb_vaRateVm_min.text.length == 0) {
+                _lb_vaRateVm_min.text = @"0.990";
+            }
         }
     }
 }

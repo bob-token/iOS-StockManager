@@ -14,6 +14,8 @@
 #define PERCENT_OF_STOPLOSS_TAG @"percentOfStopLoss"
 #define PERCENT_OF_PROFITONLY_TAG @"percentOfProfitOlny"
 #define TIME_TAG @"time"
+#define MAX_VAULE_RATE_VOLUME_INCREASE_TAG @"max_valueRateVolume_increase"
+#define MIN_VAULE_RATE_VOLUME_INCREASE_TAG @"min_valueRateVolume_increase"
 
 @interface ConfigViewController : UIViewController
 @property (strong, nonatomic) IBOutlet UITextField *lb_time;
@@ -25,6 +27,8 @@
 @property (strong, nonatomic) IBOutlet UITextField *priceOfLoss;
 @property (strong, nonatomic) IBOutlet UITextField *priceOfProfit;
 @property (strong, nonatomic) IBOutlet UINavigationBar *nb_topbar;
+@property (strong, nonatomic) IBOutlet UITextField *lb_vaRateVm_max;
+@property (strong, nonatomic) IBOutlet UITextField *lb_vaRateVm_min;
 @property (strong, nonatomic) IBOutlet UINavigationItem *barTitle;
 - (IBAction)back:(id)sender;
 - (IBAction)priceEditingEnd:(id)sender;

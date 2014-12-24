@@ -398,8 +398,12 @@
     if (fh && [fh.stock isValide]) {
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
-        float valuePerVol_min = 0.990;
-        float valuePerVol_max = 1.030;
+        float vaRateVm_max = [[fh getBoughtDetail:MAX_VAULE_RATE_VOLUME_INCREASE_TAG] floatValue];
+        float vaRateVm_min = [[fh getBoughtDetail:MIN_VAULE_RATE_VOLUME_INCREASE_TAG] floatValue];
+//        float valuePerVol_min = 0.990;
+        float valuePerVol_min = vaRateVm_min;
+//        float valuePerVol_max = 1.030;
+        float valuePerVol_max = vaRateVm_max;
         BOOL notify = NO;
         fh.warnningType = 0;
         if ([fh CalcCurIncomeRate] > profit || [fh CalcCurIncomeRate] < loss*-1) {
