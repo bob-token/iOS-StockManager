@@ -265,7 +265,6 @@
 
 - (void)dealloc
 {
-    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
     self.datasource = nil;
     self.codeArray = nil;
 }
@@ -301,8 +300,6 @@
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
-    //禁止自动锁屏
-    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
     
     [_tableview registerClass:TableViewCell.class forCellReuseIdentifier:TABLEVIEW_CELL_REUSE_ID];
     // Do any additional setup after loading the view, typically from a nib.
@@ -401,12 +398,21 @@
     if (fh && [fh.stock isValide]) {
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
+        float valuePerVol_min = 0.990;
+        float valuePerVol_max = 1.030;
+        BOOL notify = NO;
+        fh.warnningType = 0;
         if ([fh CalcCurIncomeRate] > profit || [fh CalcCurIncomeRate] < loss*-1) {
+            notify = YES;
+        }
+        if([fh getAverageVaRateVm] > valuePerVol_max || [fh getAverageVaRateVm] < valuePerVol_min){
+            notify = YES;
+            fh.warnningType = 2;
+        }
+        if (notify) {
             NSString* info = fh.stock.name;
             [StaticUtils NotifyUser:[info stringByAppendingFormat:@" %.2f %.2f",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
         }
-        
-        fh.warnningType = 0;
         
         if ([fh CalcCurIncomeRate] > profit) {
             fh.warnningType = 1;
@@ -584,10 +590,12 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
        cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
     }
     UIColor *bgcolor = [UIColor clearColor];
-    if (fh.warnningType > 0) {
+    if (fh.warnningType == 1) {
         bgcolor = [UIColor redColor];
-    }else if (fh.warnningType < 0){
+    }else if (fh.warnningType == -1){
         bgcolor = [UIColor greenColor];
+    }else if (fh.warnningType == 2){
+        bgcolor = [UIColor yellowColor];
     }
     cell.backgroundColor = bgcolor;
     

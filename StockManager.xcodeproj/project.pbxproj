@@ -19,6 +19,7 @@
 		40AAFADE1A3565E500802C1D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40AAFADD1A3565E500802C1D /* Images.xcassets */; };
 		40AAFAE11A3565E500802C1D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 40AAFADF1A3565E500802C1D /* LaunchScreen.xib */; };
 		40AAFAED1A3565E500802C1D /* StockManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 40AAFAEC1A3565E500802C1D /* StockManagerTests.m */; };
+		40B601251A481EB300D7FEDB /* LogicTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 40B601241A481EB300D7FEDB /* LogicTests.m */; };
 		91901E1A9569FA1DEB027CB8 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B6EF15A9263D99C51922FF35 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +56,7 @@
 		40AAFAE61A3565E500802C1D /* StockManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StockManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		40AAFAEB1A3565E500802C1D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		40AAFAEC1A3565E500802C1D /* StockManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StockManagerTests.m; sourceTree = "<group>"; };
+		40B601241A481EB300D7FEDB /* LogicTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogicTests.m; sourceTree = "<group>"; };
 		540324EF03DB56F99E537E04 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		B6EF15A9263D99C51922FF35 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -149,6 +151,7 @@
 		40AAFAE91A3565E500802C1D /* StockManagerTests */ = {
 			isa = PBXGroup;
 			children = (
+				40B601241A481EB300D7FEDB /* LogicTests.m */,
 				40AAFAEC1A3565E500802C1D /* StockManagerTests.m */,
 				40AAFAEA1A3565E500802C1D /* Supporting Files */,
 			);
@@ -335,6 +338,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40B601251A481EB300D7FEDB /* LogicTests.m in Sources */,
 				40AAFAED1A3565E500802C1D /* StockManagerTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
