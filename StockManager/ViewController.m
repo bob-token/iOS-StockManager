@@ -161,6 +161,19 @@
     }
     return nil;
 }
+-(id)getBoughtDetail:(NSString*)detailTag default:(id)value
+{
+    NSDictionary* dic = [ConfigViewController getCodeConfigInfo:_stock.code];
+    //dic == nil 时，表示没有配置信息
+    if (detailTag) {
+        if ([dic objectForKey:detailTag] == nil) {
+            return value;
+        }
+        return [dic valueForKey:detailTag];
+    }
+    return nil;
+}
+
 
 /**
  *  @author bob, 14-12-19 12:12:30
@@ -398,11 +411,9 @@
     if (fh && [fh.stock isValide]) {
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
-        float vaRateVm_max = [[fh getBoughtDetail:MAX_VAULE_RATE_VOLUME_INCREASE_TAG] floatValue];
-        float vaRateVm_min = [[fh getBoughtDetail:MIN_VAULE_RATE_VOLUME_INCREASE_TAG] floatValue];
-//        float valuePerVol_min = 0.990;
+        float vaRateVm_max =[[fh getBoughtDetail:MAX_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 1.030]] floatValue];
+        float vaRateVm_min =[[fh getBoughtDetail:MIN_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 0.980]] floatValue];
         float valuePerVol_min = vaRateVm_min;
-//        float valuePerVol_max = 1.030;
         float valuePerVol_max = vaRateVm_max;
         BOOL notify = NO;
         fh.warnningType = 0;
