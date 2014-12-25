@@ -12,6 +12,7 @@
 //@interface ViewController : UITableViewController<UITableViewDataSource,UITableViewDelegate>
 @property (strong, nonatomic) IBOutlet UITableView *tableview;
 @property (strong, nonatomic) IBOutlet UIButton *bt_monitor;
+@property (strong, nonatomic) IBOutlet UINavigationItem *bar;
 @property (nonatomic, assign) BOOL bStarting;
 
 - (IBAction)btAdd:(id)sender;

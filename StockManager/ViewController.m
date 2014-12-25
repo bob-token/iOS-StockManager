@@ -311,6 +311,14 @@
         [self btStart:self];
     }
 }
+- (void)updateAllIncome
+{
+    float total = 0;
+    for (StockInfoHelper* fh in _datasource) {
+        total += [fh CalcCurIncome];
+    }
+    self.bar.title = [NSString stringWithFormat:@"%.2f",total ];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -412,7 +420,7 @@
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
         float vaRateVm_max =[[fh getBoughtDetail:MAX_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 1.030]] floatValue];
-        float vaRateVm_min =[[fh getBoughtDetail:MIN_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 0.980]] floatValue];
+        float vaRateVm_min =[[fh getBoughtDetail:MIN_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 0.990]] floatValue];
         float valuePerVol_min = vaRateVm_min;
         float valuePerVol_max = vaRateVm_max;
         BOOL notify = NO;
@@ -453,6 +461,7 @@
         [fh calcValueAverageRate];
         [fh calcVolumeAverageRate];
         [self checkUserCondition:fh];
+        [self updateAllIncome];
         [_tableview reloadData];
     }
 }
