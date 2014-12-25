@@ -42,25 +42,6 @@
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
 }
-
-- (void)keyboardWillShow:(NSNotification *)aNotification
-
-
-{
-    NSDictionary *userInfo = [aNotification userInfo];
-    CGRect keyboardRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    NSTimeInterval animationDuration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    
-    CGRect newFrame = self.view.frame;
-    newFrame.origin.y-= keyboardRect.size.height;
-    
-    [UIView beginAnimations:@"ResizeTextView" context:nil];
-    [UIView setAnimationDuration:animationDuration+0.2];
-    
-    self.view.frame = newFrame;  
-    
-    [UIView commitAnimations];  
-}
 -(void)viewDidDisappear:(BOOL)animated
 {
     [super viewDidDisappear:animated];
@@ -73,21 +54,48 @@
                                                   object:nil];
 }
 
+-(void)viewScrollAnimation:(CGRect)frame TimeInterval:(NSTimeInterval)interval
+{
+    [UIView beginAnimations:@"ResizeTextView" context:nil];
+    [UIView setAnimationDuration:interval];
+    self.view.frame = frame;
+    [UIView commitAnimations];
+}
+-(CGRect)focusControlPosition
+{
+    CGRect frame = CGRectMake(0, 0, 0, 0);
+    UIView* focus = [StaticUtils getFirstResponder:self.view];
+    if (focus) {
+        frame = focus.frame;
+    }
+    return frame;
+}
+- (void)keyboardWillShow:(NSNotification *)aNotification
+{
+    NSDictionary *userInfo = [aNotification userInfo];
+    CGRect keyboardRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    NSTimeInterval animationDuration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    CGRect newFrame = self.view.frame;
+    float kbHeight =  SCREEN_HEIGHT - keyboardRect.size.height;
+    CGRect focusPos = [self focusControlPosition];
+    float scrollH = focusPos.origin.y+focusPos.size.height - kbHeight;
+    if (scrollH > 0) {
+        newFrame.origin.y-= scrollH+10;
+        [self viewScrollAnimation:newFrame TimeInterval:animationDuration+0.2];
+    }
+}
+
 - (void)keyboardWillHide:(NSNotification *)aNotification
 {
     NSDictionary *userInfo = [aNotification userInfo];
     NSTimeInterval animationDuration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    CGRect keyboardRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+//    CGRect keyboardRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     
     CGRect newFrame = self.view.frame;
-    newFrame.origin.y += keyboardRect.size.height;
+    newFrame.origin.y =0;
     
-    [UIView beginAnimations:@"ResizeView" context:nil];
-    [UIView setAnimationDuration:animationDuration];
+    [self viewScrollAnimation:newFrame TimeInterval:animationDuration];
     
-    self.view.frame = newFrame;
-    
-    [UIView commitAnimations];  
 }
 
 - (void)viewDidAppear:(BOOL)animated

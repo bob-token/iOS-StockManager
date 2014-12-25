@@ -133,4 +133,18 @@
         [StaticUtils viber];
     }
 }
++(UIView *)getFirstResponder:(UIView*)parent
+{
+    UIView *firstResponder = nil;
+    firstResponder = parent;
+    for (UIView *view in parent.subviews) //: caused error
+    {
+        if (view.isFirstResponder)
+        {
+            firstResponder = view;
+            break;
+        }
+    }
+    return firstResponder;
+}
 @end

@@ -7,9 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 #define    TIME_FORMAT_YYYY_MM_dd_SPACE_hh_mm_ss 0
 #define    TIME_FORMAT_YYYYMMddhhmmss 1
+#define SCREEN_WIDTH [[UIScreen mainScreen] bounds].size.width
+#define SCREEN_HEIGHT [[UIScreen mainScreen] bounds].size.height
 
 #define OS_VERSION_FLOAT_VAL [[[UIDevice currentDevice] systemVersion] floatValue]
 
@@ -22,4 +25,5 @@
 +(void)viber;
 +(BOOL)isLaunchedInBackground;
 +(void)NotifyUser:(NSString*)info;
++(UIView *)getFirstResponder:(UIView*)parent;
 @end
