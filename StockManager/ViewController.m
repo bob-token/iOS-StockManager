@@ -237,8 +237,10 @@
     if (_stock && [_stock isValide]) {
         float tpercent = [_stock getPercent];
         float tnowPrice = _stock.nowPrice;
+        float tmax = _stock.maxPrice;
+        float tmin = _stock.minPrice;
         NSInteger tKVolume = _stock.volume/1000;
-        return [NSString stringWithFormat:@"%.2f(%.2f) %ld(K)",tnowPrice,tpercent,(long)tKVolume];
+        return [NSString stringWithFormat:@"%.2f(%.2f) %.2f(x) %.2f(n) %ld(K)",tnowPrice,tpercent,tmax,tmin,(long)tKVolume];
     }
     if (_stock) {
         return @"...";
@@ -319,9 +321,10 @@
     }
     self.bar.title = [NSString stringWithFormat:@"%.2f",total ];
 }
+#define status_bar_height 100
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+//   [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [_tableview registerClass:TableViewCell.class forCellReuseIdentifier:TABLEVIEW_CELL_REUSE_ID];
     // Do any additional setup after loading the view, typically from a nib.
     if (_datasource ==nil) {
@@ -609,6 +612,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     cell.lb_code.text = fh.stock.code;
     cell.name.text = fh.stock.name;
     cell.lb_info.text = fh.constructCodeDisplayInfo;
+//    [cell.lb_info setFont:[UIFont fontWithName:nil size:16.0]];
     cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.3f(ua/ma) %.3f(lua/lma)",[fh.stock getCurDealCostRate], [fh getAverageVaRateVm], [fh getLastVaRateVm]];
     if ([fh isBought]) {
        cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];

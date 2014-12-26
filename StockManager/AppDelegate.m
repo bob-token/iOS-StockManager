@@ -22,7 +22,6 @@
     // Override point for customization after application launch.
     NSLog(@"Launched in background %d", UIApplicationStateBackground == application.applicationState);
     [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
-    
     //禁止自动锁屏
     [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
     
