@@ -23,9 +23,7 @@
     self = [super initWithNibName:nil bundle:(NSBundle*)nibNameOrNil];
     if (self) {
         self.lb_price = [[UITextField alloc] init];
-//        self.lb_volume = [[UITextField alloc] init];
         [self.view addSubview:self.lb_price];
-//        [self.view addSubview:self.lb_volume];
     }
     return self;
 }
@@ -89,7 +87,6 @@
 {
     NSDictionary *userInfo = [aNotification userInfo];
     NSTimeInterval animationDuration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-//    CGRect keyboardRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     
     CGRect newFrame = self.view.frame;
     newFrame.origin.y =0;
@@ -107,6 +104,7 @@
     // Do any additional setup after loading the view from its nib.
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(actionTap:)];
     [self.view addGestureRecognizer:tapGesture];
+    
 }
 -(void)actionTap:(UITapGestureRecognizer*)tap
 {
@@ -149,6 +147,8 @@
         [dic setValue:_lb_time.text forKey:TIME_TAG];
         [dic setValue:_lb_vaRateVm_max.text forKey:MAX_VAULE_RATE_VOLUME_INCREASE_TAG];
         [dic setValue:_lb_vaRateVm_min.text forKey:MIN_VAULE_RATE_VOLUME_INCREASE_TAG];
+        [dic setValue:[NSNumber numberWithBool:_sw_showName.on] forKey:SHOW_STOCK_NAME_TAG];
+        [dic setValue:[NSNumber numberWithBool:_sw_monitor.on] forKey:MONITOR_STOCK_TAG];
         [StaticUtils standardUserDefaultsSetValue:dic forKey:[self getCode]];
     }
 }
@@ -159,6 +159,25 @@
         return [StaticUtils standardUserDefaultsGetValueforKey:code];
     }
     return nil;
+}
++(id)getCodeConfigDetail:(NSString*)code detailTag:(NSString*)detailTag default:(id)value
+{
+    NSDictionary* dic = [ConfigViewController getCodeConfigInfo:code];
+    //dic == nil 时，表示没有配置信息
+    if (detailTag) {
+        if ([dic objectForKey:detailTag] == nil) {
+            return value;
+        }
+        return [dic valueForKey:detailTag];
+    }
+    return nil;
+}
++(BOOL)codeIsMonitoring:(NSString*)code
+{
+    if (code) {
+        return [[ConfigViewController getCodeConfigDetail:code detailTag:MONITOR_STOCK_TAG default:NUM_YES] boolValue];
+    }
+    return NO;
 }
 -(void)updateRateByPrice
 {
@@ -211,6 +230,11 @@
             if (_lb_vaRateVm_min.text.length == 0) {
                 _lb_vaRateVm_min.text = @"0.990";
             }
+            BOOL showName =[[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:SHOW_STOCK_NAME_TAG default:NUM_NO] boolValue];
+            [_sw_showName setOn:showName];
+            BOOL monitorStock= [[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:MONITOR_STOCK_TAG default:NUM_YES] boolValue];
+            [_sw_monitor setOn:monitorStock];
+            
         }
     }
 }

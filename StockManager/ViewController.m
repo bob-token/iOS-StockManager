@@ -163,15 +163,7 @@
 }
 -(id)getBoughtDetail:(NSString*)detailTag default:(id)value
 {
-    NSDictionary* dic = [ConfigViewController getCodeConfigInfo:_stock.code];
-    //dic == nil 时，表示没有配置信息
-    if (detailTag) {
-        if ([dic objectForKey:detailTag] == nil) {
-            return value;
-        }
-        return [dic valueForKey:detailTag];
-    }
-    return nil;
+    return [ConfigViewController getCodeConfigDetail:_stock.code detailTag:detailTag default:value];
 }
 
 
@@ -206,10 +198,13 @@
     }
     return 0;
 }
-
+-(BOOL)isMonitoring
+{
+    return [ConfigViewController codeIsMonitoring:_stock.code];
+}
 -(float) CalcCurIncome
 {
-    if ([_stock isValide]) {
+    if ([_stock isValide] && [self isMonitoring]) {
         float curPrice = _stock.nowPrice;
         float buyPrice = [[self getBoughtDetail:PRICE_TAG] floatValue];
         NSInteger total = [[self getBoughtDetail:VOLUME_TAG] integerValue];
@@ -419,7 +414,7 @@
 
 -(void)checkUserCondition:(StockInfoHelper*)fh
 {
-    if (fh && [fh.stock isValide]) {
+    if (fh && [fh.stock isValide] && [fh getBoughtDetail:MONITOR_STOCK_TAG] == NUM_YES) {
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
         float vaRateVm_max =[[fh getBoughtDetail:MAX_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 1.030]] floatValue];
@@ -610,7 +605,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     TableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:TABLEVIEW_CELL_REUSE_ID];
 
     cell.lb_code.text = fh.stock.code;
-    cell.name.text = fh.stock.name;
+    if ([fh getBoughtDetail:SHOW_STOCK_NAME_TAG] == NUM_YES){
+        cell.name.text = fh.stock.name;
+    }else {
+        cell.name.text = @"";
+    }
     cell.lb_info.text = fh.constructCodeDisplayInfo;
 //    [cell.lb_info setFont:[UIFont fontWithName:nil size:16.0]];
     cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.3f(ua/ma) %.3f(lua/lma)",[fh.stock getCurDealCostRate], [fh getAverageVaRateVm], [fh getLastVaRateVm]];

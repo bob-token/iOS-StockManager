@@ -15,6 +15,8 @@
 #define SCREEN_HEIGHT [[UIScreen mainScreen] bounds].size.height
 
 #define OS_VERSION_FLOAT_VAL [[[UIDevice currentDevice] systemVersion] floatValue]
+#define NUM_YES [NSNumber numberWithBool:YES]
+#define NUM_NO [NSNumber numberWithBool:NO]
 
 @interface StaticUtils : NSObject
 +(void) standardUserDefaultsSetValue:(id)value forKey:(NSString *)key;

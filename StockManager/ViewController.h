@@ -77,4 +77,5 @@
 -(void)calcVolumeAverageRate;
 -(void)calcValueAverageRate;
 -(NSString*)constructCodeDisplayInfo;
+-(BOOL)isMonitoring;
 @end

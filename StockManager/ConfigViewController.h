@@ -16,6 +16,8 @@
 #define TIME_TAG @"time"
 #define MAX_VAULE_RATE_VOLUME_INCREASE_TAG @"max_valueRateVolume_increase"
 #define MIN_VAULE_RATE_VOLUME_INCREASE_TAG @"min_valueRateVolume_increase"
+#define SHOW_STOCK_NAME_TAG @"showStockName"
+#define MONITOR_STOCK_TAG @"monitorStock"
 
 @interface ConfigViewController : UIViewController
 @property (strong, nonatomic) IBOutlet UITextField *lb_time;
@@ -29,6 +31,8 @@
 @property (strong, nonatomic) IBOutlet UINavigationBar *nb_topbar;
 @property (strong, nonatomic) IBOutlet UITextField *lb_vaRateVm_max;
 @property (strong, nonatomic) IBOutlet UITextField *lb_vaRateVm_min;
+@property (strong, nonatomic) IBOutlet UISwitch *sw_showName;
+@property (strong, nonatomic) IBOutlet UISwitch *sw_monitor;
 @property (strong, nonatomic) IBOutlet UINavigationItem *barTitle;
 - (IBAction)back:(id)sender;
 - (IBAction)priceEditingEnd:(id)sender;
@@ -38,4 +42,6 @@
 - (IBAction)StopLostPriceEditingEnd:(id)sender;
 - (IBAction)profitOnlyPriceEditingEnd:(id)sender;
 +(NSDictionary*)getCodeConfigInfo:(NSString*)code;
++(id)getCodeConfigDetail:(NSString*)code detailTag:(NSString*)detailTag default:(id)value;
++(BOOL)codeIsMonitoring:(NSString*)code;
 @end

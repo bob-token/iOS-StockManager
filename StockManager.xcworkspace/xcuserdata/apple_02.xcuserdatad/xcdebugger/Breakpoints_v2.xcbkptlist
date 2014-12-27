@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "StockManager/ViewController.m"
-            timestampString = "441256241.06571"
+            timestampString = "441352944.921025"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "529"
-            endingLineNumber = "529"
+            startingLineNumber = "524"
+            endingLineNumber = "524"
             landmarkName = "-longPressToDo:"
             landmarkType = "5">
          </BreakpointContent>
