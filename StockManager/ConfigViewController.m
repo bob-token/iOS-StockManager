@@ -145,6 +145,7 @@
         [dic setValue:_lb_vaRateVm_min.text forKey:MIN_VAULE_RATE_VOLUME_INCREASE_TAG];
         [dic setValue:[NSNumber numberWithBool:_sw_showName.on] forKey:SHOW_STOCK_NAME_TAG];
         [dic setValue:[NSNumber numberWithBool:_sw_monitor.on] forKey:MONITOR_STOCK_TAG];
+        [dic setValue:[NSNumber numberWithBool:_sw_showStockInfo.on] forKey:SHOW_STOCK_INFO_TAG];
         [StaticUtils standardUserDefaultsSetValue:dic forKey:[self getCode]];
     }
 }
@@ -167,6 +168,20 @@
         return [dic valueForKey:detailTag];
     }
     return nil;
+}
++(BOOL)codeIsShowName:(NSString*)code
+{
+    if ([ConfigViewController codeIsShowInfo:code]) {
+        return [[ConfigViewController getCodeConfigDetail:code detailTag:SHOW_STOCK_NAME_TAG default:NUM_YES] boolValue];
+    }
+    return NO;
+}
++(BOOL)codeIsShowInfo:(NSString*)code
+{
+    if (code) {
+        return [[ConfigViewController getCodeConfigDetail:code detailTag:SHOW_STOCK_INFO_TAG default:NUM_YES] boolValue];
+    }
+    return NO;
 }
 +(BOOL)codeIsMonitoring:(NSString*)code
 {
@@ -226,6 +241,9 @@
             if (_lb_vaRateVm_min.text.length == 0) {
                 _lb_vaRateVm_min.text = @"0.990";
             }
+            BOOL showInfo =[[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:SHOW_STOCK_INFO_TAG default:NUM_YES] boolValue];
+            [_sw_showStockInfo setOn:showInfo];
+            
             BOOL showName =[[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:SHOW_STOCK_NAME_TAG default:NUM_NO] boolValue];
             [_sw_showName setOn:showName];
             BOOL monitorStock= [[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:MONITOR_STOCK_TAG default:NUM_YES] boolValue];

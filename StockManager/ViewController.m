@@ -414,7 +414,13 @@
 
 -(void)checkUserCondition:(StockInfoHelper*)fh
 {
-    if (fh && [fh.stock isValide] && [fh isMonitoring]) {
+    if (fh && [fh.stock isValide] ) {
+        
+        fh.warnningType = 0;
+        
+        if (![fh isMonitoring]) {
+            return;
+        }
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
         float vaRateVm_max =[[fh getBoughtDetail:MAX_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 1.030]] floatValue];
@@ -422,7 +428,7 @@
         float valuePerVol_min = vaRateVm_min;
         float valuePerVol_max = vaRateVm_max;
         BOOL notify = NO;
-        fh.warnningType = 0;
+        
         if ([fh CalcCurIncomeRate] > profit || [fh CalcCurIncomeRate] < loss*-1) {
             notify = YES;
         }
@@ -600,21 +606,27 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
     StockInfoHelper* fh = (StockInfoHelper*)_datasource[indexPath.row];
     TableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:TABLEVIEW_CELL_REUSE_ID];
 
-    cell.lb_code.text = fh.stock.code;
-    if ([fh getBoughtDetail:SHOW_STOCK_NAME_TAG] == NUM_YES){
-        cell.name.text = fh.stock.name;
-    }else {
-        cell.name.text = @"";
-    }
-    cell.lb_info.text = fh.constructCodeDisplayInfo;
-//    [cell.lb_info setFont:[UIFont fontWithName:nil size:16.0]];
-    cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.3f(ua/ma) %.3f(lua/lma)",[fh.stock getCurDealCostRate], [fh getAverageVaRateVm], [fh getLastVaRateVm]];
-    if ([fh isBought]) {
-       cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
+    cell.lb_code.text =@"";
+    cell.name.text = @"";
+    cell.lb_info.text =@"";
+    cell.lb_calc.text = @"";
+    if ([ConfigViewController codeIsShowInfo:fh.stock.code]) {
+        cell.lb_code.text = fh.stock.code;
+        if ([ConfigViewController codeIsShowName:fh.stock.code]){
+            cell.name.text = fh.stock.name;
+        }else {
+            cell.name.text = @"";
+        }
+        
+        cell.lb_info.text = fh.constructCodeDisplayInfo;
+        //    [cell.lb_info setFont:[UIFont fontWithName:nil size:16.0]];
+        cell.lb_calc.text = [NSString stringWithFormat:@"%.3f %.3f(ua/ma) %.3f(lua/lma)",[fh.stock getCurDealCostRate], [fh getAverageVaRateVm], [fh getLastVaRateVm]];
+        if ([fh isBought]) {
+            cell.name.text =  [cell.name.text stringByAppendingString:[NSString stringWithFormat:@"(%.2f%%)(%.2f)",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
+        }
     }
     UIColor *bgcolor = [UIColor clearColor];
     if (fh.warnningType == 1) {
