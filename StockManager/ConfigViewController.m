@@ -39,6 +39,7 @@
                                              selector:@selector(keyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
+    [self loadConfig];
 }
 -(void)viewDidDisappear:(BOOL)animated
 {
@@ -93,11 +94,6 @@
     
     [self viewScrollAnimation:newFrame TimeInterval:animationDuration];
     
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [self loadConfig];
 }
 - (void)viewDidLoad {
     [super viewDidLoad];

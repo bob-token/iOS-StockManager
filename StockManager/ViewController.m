@@ -414,7 +414,7 @@
 
 -(void)checkUserCondition:(StockInfoHelper*)fh
 {
-    if (fh && [fh.stock isValide] && [fh getBoughtDetail:MONITOR_STOCK_TAG] == NUM_YES) {
+    if (fh && [fh.stock isValide] && [fh isMonitoring]) {
         float profit = [[fh getBoughtDetail:PERCENT_OF_PROFITONLY_TAG] floatValue];
         float loss = [[fh getBoughtDetail:PERCENT_OF_STOPLOSS_TAG] floatValue];
         float vaRateVm_max =[[fh getBoughtDetail:MAX_VAULE_RATE_VOLUME_INCREASE_TAG default:[NSNumber numberWithFloat: 1.030]] floatValue];
