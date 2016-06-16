@@ -18,8 +18,7 @@
 {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
         UIView *view = [[NSBundle mainBundle] loadNibNamed:@"TableViewCell" owner:self options:nil].lastObject;
-        
-        
+        view.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:view];
     }
     return self;
