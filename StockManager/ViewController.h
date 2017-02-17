@@ -63,6 +63,7 @@
 
 @interface StockInfoHelper : NSObject
 @property (nonatomic, strong)StockInfo* stock;
+@property (nonatomic, assign)float averagePrice;//日平均价
 @property (nonatomic,assign)NSInteger lastVolume;
 @property (nonatomic,assign)float volumeAverage; //量的增量平均值
 @property (nonatomic,assign)float volumeLastIncreaseRate; //量的最后增量比
@@ -76,6 +77,11 @@
 -(id)initWithStockInfo:(StockInfo*)stock;
 -(void)calcVolumeAverageRate;
 -(void)calcValueAverageRate;
+-(void)calcAveragePrice;
 -(NSString*)constructCodeDisplayInfo;
 -(BOOL)isMonitoring;
+-(BOOL)isGreaterAverageTip;
+-(BOOL)isGreaterAverage;
+-(BOOL)isLessAverageTip;
+-(BOOL)isLessAverage;
 @end

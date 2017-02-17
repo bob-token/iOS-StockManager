@@ -146,6 +146,8 @@
         [dic setValue:[NSNumber numberWithBool:_sw_showName.on] forKey:SHOW_STOCK_NAME_TAG];
         [dic setValue:[NSNumber numberWithBool:_sw_monitor.on] forKey:MONITOR_STOCK_TAG];
         [dic setValue:[NSNumber numberWithBool:_sw_showStockInfo.on] forKey:SHOW_STOCK_INFO_TAG];
+        [dic setValue:[NSNumber numberWithBool:_sw_greaterAverageTip.on] forKey:NOW_PRICE_GREATER_THAN_AVERAGE_TAG];
+        [dic setValue:[NSNumber numberWithBool:_sw_lessAverageTip.on] forKey:NOW_PRICE_LESS_THAN_AVERAGE_TAG];
         [StaticUtils standardUserDefaultsSetValue:dic forKey:[self getCode]];
     }
 }
@@ -190,6 +192,21 @@
     }
     return NO;
 }
++(BOOL)codeIsGreaterAverageTip:(NSString*)code
+{
+    if (code) {
+        return [[ConfigViewController getCodeConfigDetail:code detailTag:NOW_PRICE_GREATER_THAN_AVERAGE_TAG default:NUM_NO] boolValue];
+    }
+    return NO;
+}
++(BOOL)codeIsLessAverageTip:(NSString*)code
+{
+    if (code) {
+        return [[ConfigViewController getCodeConfigDetail:code detailTag:NOW_PRICE_LESS_THAN_AVERAGE_TAG default:NUM_NO] boolValue];
+    }
+    return NO;
+}
+
 -(void)updateRateByPrice
 {
     float stopLostRate =1-[_priceOfLoss.text floatValue]/[_lb_price.text floatValue];
@@ -248,7 +265,11 @@
             [_sw_showName setOn:showName];
             BOOL monitorStock= [[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:MONITOR_STOCK_TAG default:NUM_YES] boolValue];
             [_sw_monitor setOn:monitorStock];
-            
+            BOOL greaterAverage= [[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:NOW_PRICE_GREATER_THAN_AVERAGE_TAG default:NUM_NO] boolValue];
+            [_sw_greaterAverageTip setOn:greaterAverage];
+            BOOL lessAverage= [[ConfigViewController getCodeConfigDetail:[self getCode] detailTag:NOW_PRICE_LESS_THAN_AVERAGE_TAG default:NUM_YES] boolValue];
+            [_sw_lessAverageTip setOn:lessAverage];
+ 
         }
     }
 }

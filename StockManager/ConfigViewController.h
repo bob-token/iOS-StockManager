@@ -19,6 +19,8 @@
 #define SHOW_STOCK_NAME_TAG @"showStockName"
 #define SHOW_STOCK_INFO_TAG @"showStockInfo"
 #define MONITOR_STOCK_TAG @"monitorStock"
+#define NOW_PRICE_GREATER_THAN_AVERAGE_TAG @"priceGreaterThanAverage"
+#define NOW_PRICE_LESS_THAN_AVERAGE_TAG @"priceLessThanAverage"
 
 @interface ConfigViewController : UIViewController
 @property (strong, nonatomic) IBOutlet UITextField *lb_time;
@@ -35,6 +37,8 @@
 @property (strong, nonatomic) IBOutlet UISwitch *sw_showName;
 @property (strong, nonatomic) IBOutlet UISwitch *sw_monitor;
 @property (strong, nonatomic) IBOutlet UISwitch *sw_showStockInfo;
+@property (strong, nonatomic) IBOutlet UISwitch *sw_greaterAverageTip;
+@property (strong, nonatomic) IBOutlet UISwitch *sw_lessAverageTip;
 @property (strong, nonatomic) IBOutlet UINavigationItem *barTitle;
 - (IBAction)back:(id)sender;
 - (IBAction)priceEditingEnd:(id)sender;
@@ -48,4 +52,6 @@
 +(BOOL)codeIsMonitoring:(NSString*)code;
 +(BOOL)codeIsShowName:(NSString*)code;
 +(BOOL)codeIsShowInfo:(NSString*)code;
++(BOOL)codeIsGreaterAverageTip:(NSString*)code;
++(BOOL)codeIsLessAverageTip:(NSString*)code;
 @end

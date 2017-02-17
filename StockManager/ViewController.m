@@ -202,6 +202,32 @@
 {
     return [ConfigViewController codeIsMonitoring:_stock.code];
 }
+-(BOOL)isGreaterAverageTip
+{
+    return [ConfigViewController codeIsGreaterAverageTip:_stock.code];
+}
+-(BOOL)isGreaterAverage
+{
+    if (_stock && [_stock isValide] ) {
+
+        return _stock.nowPrice > _averagePrice;
+    
+    }
+        return NO;
+}
+-(BOOL)isLessAverageTip
+{
+    return [ConfigViewController codeIsLessAverageTip:_stock.code];
+}
+-(BOOL)isLessAverage
+{
+    if (_stock && [_stock isValide] ) {
+        
+        return _stock.nowPrice < _averagePrice;
+        
+    }
+    return NO;
+}
 -(float) CalcCurIncome
 {
     if ([_stock isValide] && [self isMonitoring]) {
@@ -268,6 +294,17 @@
         }
         self.lastValue = _stock.value;
     }
+}
+
+-(void)calcAveragePrice
+{
+    if (_stock && [_stock isValide]) {
+        self.averagePrice = _stock.nowPrice;
+        if (_stock.value!= 0 && _stock.volume!= 0) {
+            self.averagePrice = (float)_stock.value/_stock.volume;
+        }
+    }
+
 }
 
 @end
@@ -368,8 +405,9 @@
         info.sellThirdVolume = [inf[index++] integerValue];
         info.sellFourVolume = [inf[index++] integerValue];
         info.sellFiveVolume = [inf[index++] integerValue];
-        info.date = inf[31];
-        info.time = inf[32];
+        info.date = inf[30];
+        info.time = inf[31];
+        
         return info;
     }
     return nil;
@@ -436,6 +474,15 @@
             notify = YES;
             fh.warnningType = 2;
         }
+        if([fh isGreaterAverageTip] && [fh isGreaterAverage]){
+            notify = YES;
+            fh.warnningType = 1;
+        }
+        if([fh isLessAverageTip] && [fh isLessAverage]){
+            notify = YES;
+            fh.warnningType = -1;
+        }
+       
         if (notify) {
             NSString* info = fh.stock.name;
             [StaticUtils NotifyUser:[info stringByAppendingFormat:@" %.2f %.2f",[fh CalcCurIncomeRate]*100,[fh CalcCurIncome]]];
@@ -447,6 +494,7 @@
         if ([fh CalcCurIncomeRate] < loss*-1) {
             fh.warnningType = -1;
         }
+        
     }
 }
 -(void)parseCodeInfo:(NSString*)code info:(NSString*)info
@@ -464,6 +512,7 @@
         
         [fh calcValueAverageRate];
         [fh calcVolumeAverageRate];
+        [fh calcAveragePrice];
         [self checkUserCondition:fh];
         [self updateAllIncome];
         [_tableview reloadData];
